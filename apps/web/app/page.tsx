@@ -1,22 +1,14 @@
 'use client'
 
-import {ConnectButton, useSuiClient, useSuiClientQuery} from "@mysten/dapp-kit";
+import {ConnectButton, useSuiClientQuery} from "@mysten/dapp-kit";
 import { Button } from "@repo/ui/components/ui/button";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@repo/ui/components/ui/accordion"
 import Image from 'next/image'
 import Link from "next/link";
 
-import {SUI_DECIMALS} from "@mysten/sui.js/utils"
 import {Content} from "./components/content";
 import {Footer} from "./components/footer";
 
 export default function Page() {
-  const client = useSuiClient();
 
   const { data, isPending, isError, error, refetch } = useSuiClientQuery(
     'getAllBalances',
@@ -28,8 +20,6 @@ export default function Page() {
     },
   );
 
-  // console.log(data[0].totalBalance)
-  const balance = 0
   const address = 'https://suiexplorer.com/address/0x2cf0029ed0845f27da4af2f3bb252437c4e33378332b873b53b88dfc1dba4fb1?network=testnet'
 
   return (
