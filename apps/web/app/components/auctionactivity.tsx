@@ -6,12 +6,12 @@ export const AuctionActivity = () => {
   return (
 
     <div className=''>
-      <div className='flex flex-col '>
+      <div className='flex flex-col w-full'>
           <div className='mb-20 text-5xl font-medium'>
             Object 0
           </div>
         <div className='flex items-center justify-between'>
-          <div>
+          <div >
             <div>
               Current bid
             </div>
@@ -30,8 +30,8 @@ export const AuctionActivity = () => {
         </div>
       </div>
       <div className="flex w-full max-w-sm items-center mt-20 space-x-2 ">
-        <Input type="email" placeholder="Ξ 0.001 or more" />
-        <Button type="submit">Place Bid</Button>
+        <Input className='h-14' type="email" placeholder="Ξ 0.001 or more" />
+        <Button className='h-14 w-28' type="submit">Place Bid</Button>
       </div>
     </div>
   )
