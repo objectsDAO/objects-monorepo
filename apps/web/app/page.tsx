@@ -43,7 +43,7 @@ export default function Page() {
                     <Link href={address}>
                       <Button  variant="outline" className='font-bold bg-zinc-300 '>
                         Treasury Ξ {data?.map((balance) => (
-                            `0.${balance.totalBalance} SUI`
+                            `Ξ 0.${balance.totalBalance} SUI`
                       ))}
                       </Button>
                     </Link>

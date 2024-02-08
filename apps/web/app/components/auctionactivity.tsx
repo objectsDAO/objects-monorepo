@@ -1,30 +1,38 @@
-import { Card, CardContent } from "@ui/components/ui/card"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@ui/components/ui/carousel"
+
+import { Button } from "@ui/components/ui/button"
+import { Input } from "@ui/components/ui/input"
 
 export const AuctionActivity = () => {
   return (
-    <Carousel className="w-full max-w-xs">
-      <CarouselContent>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <CarouselItem key={index}>
-            <div className="p-1">
-              <Card>
-                <CardContent className="flex aspect-square items-center justify-center p-6">
-                  <span className="text-4xl font-semibold">{index + 1}</span>
-                </CardContent>
-              </Card>
+
+    <div>
+      <div className='flex flex-col'>
+          <div>
+            Object 0
+          </div>
+        <div className='flex'>
+          <div>
+            <div>
+              Current bid
             </div>
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
-    </Carousel>
+            <div>
+              Ξ 7.09
+            </div>
+          </div>
+          <div>
+            <div>
+              Auction ends in
+            </div>
+            <div>
+              10:32:47 PM
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex w-full max-w-sm items-center space-x-2">
+        <Input type="email" placeholder="Ξ 0.001 or more" />
+        <Button type="submit">Place Bid</Button>
+      </div>
+    </div>
   )
 }
