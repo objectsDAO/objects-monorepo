@@ -54,14 +54,18 @@ export default function Page() {
                 </div>
               </div>
               {/* image  */}
-            <div className='flex items-center justify-around'>
-              <Image
-                src='/loading-skull-noun.gif'
-                width={800}
-                height={800}
-                alt="Picture of the author"
-              />
-              <AuctionActivity/>
+            <div className='flex items-center justify-center'>
+              <div >
+                <Image
+                  src='/loading-skull-noun.gif'
+                  width={546}
+                  height={546}
+                  alt="Picture of the author"
+                />
+              </div>
+              <div className="w-1/5 h-auto">
+                <AuctionActivity/>
+              </div>
             </div>
               <Content/>
               <Footer/>

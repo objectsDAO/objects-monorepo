@@ -5,17 +5,17 @@ import { Input } from "@ui/components/ui/input"
 export const AuctionActivity = () => {
   return (
 
-    <div>
-      <div className='flex flex-col'>
-          <div>
+    <div className=''>
+      <div className='flex flex-col '>
+          <div className='mb-20 text-5xl font-medium'>
             Object 0
           </div>
-        <div className='flex'>
+        <div className='flex items-center justify-between'>
           <div>
             <div>
               Current bid
             </div>
-            <div>
+            <div className='text-3xl font-medium'>
               Ξ 7.09
             </div>
           </div>
@@ -23,13 +23,13 @@ export const AuctionActivity = () => {
             <div>
               Auction ends in
             </div>
-            <div>
+            <div className='text-3xl font-medium'>
               10:32:47 PM
             </div>
           </div>
         </div>
       </div>
-      <div className="flex w-full max-w-sm items-center space-x-2">
+      <div className="flex w-full max-w-sm items-center mt-20 space-x-2 ">
         <Input type="email" placeholder="Ξ 0.001 or more" />
         <Button type="submit">Place Bid</Button>
       </div>
