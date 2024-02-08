@@ -2,10 +2,18 @@
 
 import {ConnectButton, useSuiClient, useSuiClientQuery} from "@mysten/dapp-kit";
 import { Button } from "@repo/ui/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@repo/ui/components/ui/accordion"
 import Image from 'next/image'
 import Link from "next/link";
 
 import {SUI_DECIMALS} from "@mysten/sui.js/utils"
+import {Content} from "./components/content";
+import {Footer} from "./components/footer";
 
 export default function Page() {
   const client = useSuiClient();
@@ -54,6 +62,9 @@ export default function Page() {
                   <ConnectButton/>
                 </div>
               </div>
+              {/* image  */}
+              <Content/>
+              <Footer/>
           </main>
   );
 }
