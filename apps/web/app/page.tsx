@@ -54,7 +54,7 @@ export default function Page() {
                 </div>
               </div>
               {/* image  */}
-            <div className='flex items-center justify-center'>
+            <div className='flex items-center justify-center bg-zinc-300'>
               <div >
                 <Image
                   src='/loading-skull-noun.gif'
@@ -67,8 +67,12 @@ export default function Page() {
                 <AuctionActivity/>
               </div>
             </div>
+            <div className='bg-slate-100'>
               <Content/>
+            </div>
+            <div className='bg-slate-100'>
               <Footer/>
+            </div>
           </main>
   );
 }

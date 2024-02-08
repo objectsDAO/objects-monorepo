@@ -12,6 +12,11 @@ const config = {
   ],
   prefix: "",
   theme: {
+    listStyleType: {
+      none: 'none',
+      disc: 'disc',
+      decimal: 'decimal',
+    },
     container: {
       center: true,
       padding: "2rem",

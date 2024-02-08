@@ -2,6 +2,44 @@
 
 
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@ui/components/ui/accordion";
+import {allowedDisplayValues} from "next/dist/compiled/@next/font/dist/constants";
+
+
+const summary = [
+  {
+    content: 'Objects Network is in the [public domain](https://creativecommons.org/publicdomain/zero/1.0/)'
+  },
+  {
+    content: 'One Object is trustlessly auctioned every 1 hour, forever'
+  },
+  {
+    content: '100% of Object auction proceeds are trustlessly sent to the treasury'
+  },
+  {
+    content: 'Settlement of one auction kicks off the next.'
+  },
+  {
+    content: 'All Objects are members of Objects DAO.'
+  },
+  {
+    content: 'Objects Dao uses Obelisk Engine && MoveBlend As Development and commercialization framework'
+  },
+  {
+    content: 'One Object is equal to one vote.'
+  },
+  {
+    content: 'The treasury is controlled exclusively by Objects via governance.'
+  },
+  {
+    content: 'Artwork is generative and stored directly  100% on-chain  (not IPFS).'
+  },
+  {
+    content: 'No explicit rules exist for attribute scarcity; all Objects are equally rare.'
+  },
+  {
+    content: 'Objecters receive rewards in Objects (10% of supply for the first 5 years).'
+  },
+]
 
 export const Content = () =>{
   return (
@@ -10,25 +48,29 @@ export const Content = () =>{
         <AccordionItem value="item-1">
           <AccordionTrigger>Summary?</AccordionTrigger>
           <AccordionContent>
-            - **Objects Network is in the [public domain](https://creativecommons.org/publicdomain/zero/1.0/).**
-            - **One Object is trustlessly auctioned every 1 hour, forever.**
-            - **100% of Object auction proceeds are trustlessly sent to the treasury.**
-            - **Settlement of one auction kicks off the next.**
-            - **All Objects are members of Objects DAO.**
-            - **Objects Dao uses Obelisk Engine && MoveBlend As Development and commercialization framework**
-            - **One Object is equal to one vote.**
-            - **The treasury is controlled exclusively by Objects via governance.**
-            - **Artwork is generative and stored directly  100% on-chain  (not IPFS).**
-            - **No explicit rules exist for attribute scarcity; all Objects are equally rare.**
-            - **Objecters receive rewards in Objects (10% of supply for the first 5 years).**
+            <ul className=''>
+              {summary.map((summary)=>{
+                return (
+                  <li key={summary.content} className='text-xl font-medium'>
+                    {summary.content}
+                  </li>
+                )
+              })}
+            </ul>
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-2">
           <AccordionTrigger>Daily Auctions?</AccordionTrigger>
           <AccordionContent>
-            **The Objects Auction Contract will act as a self-sufficient Object generation and distribution mechanism, auctioning one Object every 1 hour, forever. 100% of auction proceeds (obc &&Sui) are automatically deposited in the Objects DAO treasury, where they are governed by Object owners.**
-            **Each time an auction is settled, the settlement transaction will also cause a new Object to be minted and a new 1 hour auction to begin.**
-            **While settlement is most heavily incentivized for the winning bidder, it can be triggered by anyone, allowing the system to trustlessly auction Objects as long as Sui is operational and there are interested bidders.**
+              <p>
+                The Objects Auction Contract will act as a self-sufficient Object generation and distribution mechanism, auctioning one Object every 1 hour, forever. 100% of auction proceeds (obc &&Sui) are automatically deposited in the Objects DAO treasury, where they are governed by Object owners.
+              </p>
+              <p>
+                Each time an auction is settled, the settlement transaction will also cause a new Object to be minted and a new 1 hour auction to begin
+              </p>
+              <p>
+                While settlement is most heavily incentivized for the winning bidder, it can be triggered by anyone, allowing the system to trustlessly auction Objects as long as Sui is operational and there are interested bidders
+              </p>
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-3">
