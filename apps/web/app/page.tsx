@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import {Content} from "./components/content";
 import {Footer} from "./components/footer";
+import {AuctionActivity} from "./components/auctionactivity";
 
 export default function Page() {
 
@@ -53,6 +54,15 @@ export default function Page() {
                 </div>
               </div>
               {/* image  */}
+            <div className='flex items-center justify-around'>
+              <Image
+                src='/loading-skull-noun.gif'
+                width={800}
+                height={800}
+                alt="Picture of the author"
+              />
+              <AuctionActivity/>
+            </div>
               <Content/>
               <Footer/>
           </main>

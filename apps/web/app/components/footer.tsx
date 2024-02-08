@@ -86,7 +86,7 @@ export const Footer=()=>{
     <>
       <div className=''>
         <div className="md:flex justify-between pt-12 items-center">
-          <div className="text-center md:flex justify-between mb-10 mt-10 md:mt-0 ">
+          <div className="text-center md:flex justify-between ml-20 mb-10 mt-10 md:mt-0 ">
             {ends.map(end=>(
               <div key={end.title} className="md:mr-10" >
                 <div className="text-black font-semibold text-base ">
@@ -104,7 +104,7 @@ export const Footer=()=>{
               </div>
             ))}
           </div>
-          <div>
+          <div className="mr-20">
             <div  className="flex justify-center md:justify-start " >
               <img className="w-18" src="/noggles.svg" alt=""/>
             </div>
