@@ -1,61 +1,90 @@
 module objectsDAO::Descriptor {
     use std::string::String;
     use std::vector;
-    use objectsDAO::ObjectsSeeder::{Seed, get_seed};
-    use sui::table;
-    use sui::table::Table;
-    use objectsDAO::MultiPartRLEToSVG::{SVGParams, create_svg_params};
-    use objectsDAO::MultiPartRLEToSVG;
+  use sui::object;
+  use sui::object::UID;
+  use sui::table;
+  use sui::table::Table;
+    use sui::transfer;
+  use sui::tx_context::TxContext;
 
 
-    struct ObjectsDescriptor has key,store{
-        // Noun Color Palettes (Index => Hex Colors)
-        palettes:Table<u8,String>,
-        // Noun Backgrounds (Hex Colors)
-        backgrounds:vector<String>,
-        // Noun Bodies (Custom RLE)
-        bodies:vector<vector<u8>>,
-        // Noun Accessories (Custom RLE)
-        accessories:vector<vector<u8>>,
-        // Noun Heads (Custom RLE)
-        heads:vector<vector<u8>>,
-        // Noun Glasses (Custom RLE)
-        glasses:vector<vector<u8>>
+  struct ObjectsDescriptor has key,store{
+          id:UID,
+          // Noun Color Palettes (Index => Hex Colors)
+          palettes:Table<u8,vector<String>>,
+          // Noun Backgrounds (Hex Colors)
+          backgrounds:vector<String>,
+          // Noun Bodies (Custom RLE)
+          bodies:vector<vector<u8>>,
+          // Noun Accessories (Custom RLE)
+          accessories:vector<vector<u8>>,
+          // Noun Heads (Custom RLE)
+          heads:vector<vector<u8>>,
+          // Noun Glasses (Custom RLE)
+          glasses:vector<vector<u8>>
     }
 
-
-    // /**
-    //  * @notice Generate an SVG image for use in the object URI.
-    //     return svg:string
-    //  */
-    // public fun generateSVGImage(params:SVGParams,objectsArt:ObjectsArt):String{
-    //     let svg = MultiPartRLEToSVG::generateSVG(params, objectsArt);
-    //     let svg_encode_vector = base64::encode(&svg);
-    //     let svg_encode= string::utf8(svg_encode_vector);
-    //     return svg_encode
-    // }
-
+    fun init(ctx: &mut TxContext) {
+      let objects_descriptor = ObjectsDescriptor {
+        id: object::new(ctx),
+        // Noun Color Palettes (Index => Hex Colors)
+        palettes:table::new<u8,vector<String>>(ctx),
+        // Noun Backgrounds (Hex Colors)
+        backgrounds:vector::empty<String>(),
+        // Noun Bodies (Custom RLE)
+        bodies:vector::empty<vector<u8>>(),
+        // Noun Accessories (Custom RLE)
+        accessories:vector::empty<vector<u8>>(),
+        // Noun Heads (Custom RLE)
+        heads:vector::empty<vector<u8>>(),
+        // Noun Glasses (Custom RLE)
+        glasses:vector::empty<vector<u8>>(),
+      };
+      // Transfer the forge object to the module/package publisher
+      transfer::public_share_object(objects_descriptor);
+    }
 
     /**
-    * @notice Given a seed, construct a base64 encoded SVG image.
+    * @notice Get the number of available Noun `backgrounds`.
     */
-    fun generateSVGImage(seed:Seed):String{
-        let parts =
-        let params =
-        MultiPartRLEToSVG.SVGParams memory params = create_svg_params()
+    public fun backgroundCount(objects_descriptor:&mut ObjectsDescriptor):u256 {
+        (vector::length(&objects_descriptor.backgrounds) as u256)
+    }
 
-        MultiPartRLEToSVG.SVGParams memory params = MultiPartRLEToSVG.SVGParams({
-            parts: _getPartsForSeed(seed),
-            background: backgrounds[seed.background]
-        });
-        return NFTDescriptor.generateSVGImage(params, palettes);
+  /**
+   * @notice Get the number of available Noun `bodies`.
+   */
+    public fun bodyCount(objects_descriptor:&mut ObjectsDescriptor):u256 {
+        (vector::length(&objects_descriptor.bodies) as u256)
+    }
+
+  /**
+   * @notice Get the number of available Noun `accessories`.
+   */
+    public fun accessoryCount(objects_descriptor:&mut ObjectsDescriptor):u256 {
+        (vector::length(&objects_descriptor.accessories) as u256)
+    }
+
+  /**
+   * @notice Get the number of available Noun `heads`.
+   */
+    public fun headCount(objects_descriptor:&mut ObjectsDescriptor):u256{
+        (vector::length(&objects_descriptor.heads) as u256)
+    }
+
+  /**
+   * @notice Get the number of available Noun `glasses`.
+   */
+    public fun glassesCount(objects_descriptor:&mut ObjectsDescriptor):u256 {
+      (vector::length(&objects_descriptor.glasses) as u256)
     }
 
     /**
      * @notice Add a single color to a color palette.
      */
-    public fun addColorToPalette_(paletteIndex:u8,color:String,objects_descriptor:&mut ObjectsDescriptor){
-        table::add(objects_descriptor,paletteIndex,color)
+    public fun addColorToPalette_(paletteIndex:u8,color:vector<String>,objects_descriptor:&mut ObjectsDescriptor){
+        table::add<u8,vector<String>>(&mut objects_descriptor.palettes,paletteIndex,color)
     }
 
     /**
@@ -93,21 +122,36 @@ module objectsDAO::Descriptor {
     /**
      * @notice Add Noun glasses.
      */
-    fun addGlasses_(glasses:vector<u8>,objects_descriptor:&mut ObjectsDescriptor) {
+    public fun addGlasses_(glasses:vector<u8>,objects_descriptor:&mut ObjectsDescriptor) {
         let i = vector::length(&objects_descriptor.glasses);
         vector::insert(&mut objects_descriptor.glasses, glasses, i);
     }
 
-    /**
-     * @notice Get all Noun parts for the passed `seed`.
-     */
-    fun getPartsForSeed_(seed:Seed,objects_descriptor:&ObjectsDescriptor):vector<vector<u8>> {
-        let (_background,body,accessory,head,glasses) = get_seed(seed);
-        let body = *vector::borrow(&objects_descriptor.bodies,body);
-        let accessory = *vector::borrow(&objects_descriptor.bodies,accessory);
-        let head = *vector::borrow(&objects_descriptor.bodies,head);
-        let glasses = *vector::borrow(&objects_descriptor.bodies,glasses);
-        let parts:vector<u8> = vector[body,accessory,head,glasses];
-        parts
+
+    public fun get_backgrounds(objects_descriptor:&ObjectsDescriptor):&vector<String>{
+      &objects_descriptor.backgrounds
     }
+
+    public fun get_bodies(objects_descriptor:&ObjectsDescriptor):&vector<vector<u8>>{
+      &objects_descriptor.bodies
+    }
+
+    public fun get_accessories(objects_descriptor:&ObjectsDescriptor):&vector<vector<u8>>{
+      &objects_descriptor.accessories
+    }
+
+    public fun get_heads(objects_descriptor:&ObjectsDescriptor):&vector<vector<u8>>{
+      &objects_descriptor.heads
+    }
+
+    public fun get_glasses(objects_descriptor:&ObjectsDescriptor):&vector<vector<u8>>{
+      &objects_descriptor.glasses
+    }
+
+    public fun get_palettes(objects_descriptor:&ObjectsDescriptor):&Table<u8,vector<String>>{
+      &objects_descriptor.palettes
+    }
+
+
+
 }

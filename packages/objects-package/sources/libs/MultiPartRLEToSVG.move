@@ -1,16 +1,16 @@
 module objectsDAO::MultiPartRLEToSVG {
     use std::string;
-    use std::vector;
     use std::ascii;
     use std::string::String;
-    use objectsDAO::ObjectsDescriptor::{ ObjectsArt, get_palettes};
+    use std::vector;
+    use objectsDAO::Descriptor::{ObjectsDescriptor, get_palettes};
     use sui::bcs;
     use sui::table;
-    use sui::table::Table;
 
 
-    struct SVGParams {
-        parts:vector<u8>,
+
+    struct SVGParams has drop {
+        parts:vector<vector<u8>>,
         background:String
     }
 
@@ -37,7 +37,7 @@ module objectsDAO::MultiPartRLEToSVG {
         return (rect.length,rect.colorIndex)
     }
 
-    public fun create_svg_params(parts:vector<u8>,background:String):SVGParams{
+    public fun create_svg_params(parts:vector<vector<u8>>,background:String):SVGParams{
         SVGParams{
             parts,
             background
@@ -47,7 +47,7 @@ module objectsDAO::MultiPartRLEToSVG {
     /**
      * @notice Given RLE image parts and color palettes, merge to generate a single SVG image.
      */
-    public fun generateSVG(params:SVGParams,objectsArt:ObjectsArt): vector<u8> {
+    public fun generateSVG(params:SVGParams,objects_descriptor:&ObjectsDescriptor): String {
         let svg = string::utf8(b"");
 
         let svg_header = string::utf8(b"<svg width='320' height='320' viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg' shape-rendering='crispEdges'>");
@@ -55,9 +55,7 @@ module objectsDAO::MultiPartRLEToSVG {
         let background = params.background;
         let rect_tail =  string::utf8(b"' />");
 
-        let palettes_table = get_palettes(objectsArt);
-
-        let svg_rect = generateSVGRects_(params, palettes_table);
+        let svg_rect = generateSVGRects_(params, objects_descriptor);
         let svg_tail = string::utf8(b"</svg>");
 
         string::append(&mut svg, svg_header);
@@ -67,23 +65,61 @@ module objectsDAO::MultiPartRLEToSVG {
         string::append_utf8(&mut svg, svg_rect);
         string::append(&mut svg, svg_tail);
 
-        let to_ascii = string::to_ascii(svg);
-        let to_bytes = ascii::into_bytes(to_ascii);
-
-        return to_bytes
+        svg
+        // let to_ascii = string::to_ascii(svg);
+      // let to_bytes = ascii::into_bytes(to_ascii);
+      //   let to_bytes = ascii::into_bytes(to_ascii);
+      //   return to_bytes
     }
 
     /**
      * @notice Given RLE image parts and color palettes, generate SVG rects.
      */
-    public fun generateSVGRects_(params:SVGParams,palettes_table:Table<u8,String>): vector<u8> {
-        // let lookup = vector[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320];
+    public fun generateSVGRects_(params:SVGParams,objects_descriptor:&ObjectsDescriptor): vector<u8> {
+        let lookup:vector<String> =
+          vector[
+            string::utf8(b"0"),
+            string::utf8(b"10"),
+            string::utf8(b"20"),
+            string::utf8(b"30"),
+            string::utf8(b"40"),
+            string::utf8(b"50"),
+            string::utf8(b"60"),
+            string::utf8(b"70"),
+            string::utf8(b"80"),
+            string::utf8(b"90"),
+            string::utf8(b"100"),
+            string::utf8(b"110"),
+            string::utf8(b"120"),
+            string::utf8(b"130"),
+            string::utf8(b"140"),
+            string::utf8(b"150"),
+            string::utf8(b"160"),
+            string::utf8(b"170"),
+            string::utf8(b"180"),
+            string::utf8(b"190"),
+            string::utf8(b"200"),
+            string::utf8(b"210"),
+            string::utf8(b"220"),
+            string::utf8(b"230"),
+            string::utf8(b"240"),
+            string::utf8(b"250"),
+            string::utf8(b"260"),
+            string::utf8(b"270"),
+            string::utf8(b"280"),
+            string::utf8(b"290"),
+            string::utf8(b"300"),
+            string::utf8(b"310"),
+            string::utf8(b"320"),
+          ];
         let rects = string::utf8(b"");
+
         let p = 0;
         let len = vector::length(&params.parts);
         while (p < len) {
-            let image = decodeRLEImage_(params.parts[p]);
-            let palette = table::borrow(&palettes_table, image.paletteIndex);
+            let image = decodeRLEImage_(*vector::borrow(&params.parts,p));
+            let palettes_table = get_palettes(objects_descriptor);
+            let palette = table::borrow(palettes_table, image.paletteIndex);
 
             let currentX = image.bounds.left;
             let currentY = image.bounds.top;
@@ -95,18 +131,23 @@ module objectsDAO::MultiPartRLEToSVG {
             let i = 0;
             let len = vector::length(&image.rects);
             while (i < len) {
-                let rect = vector::borrow(&mut image.rects,i);
+                let rect = vector::borrow(&image.rects,i);
                 let (_length,color_index) = get_rect_length_and_colorIndex(rect);
 
                 if (color_index != 0) {
-                    vector::insert(&mut buffer, rect.length, cursor);
-                    vector::insert(&mut buffer, (currentX as u16), cursor + 1);
-                    vector::insert(&mut buffer, (currentY as u16), cursor + 2);
-                    vector::insert(&mut buffer,  vector::borrow(string::bytes(palette), (color_index as u64)), cursor + 3);
+                    let width = *vector::borrow(&lookup,(rect.length as u64));
+                    let x = *vector::borrow(&lookup,(currentX as u64));
+                    let y = *vector::borrow(&lookup,(currentY as u64));
+                    let color_Index = *vector::borrow(palette,(color_index as u64));
+
+                    string::insert(&mut buffer, cursor, width);
+                    string::insert(&mut buffer, cursor + 1, x);
+                    string::insert(&mut buffer, cursor + 2, y);
+                    string::insert(&mut buffer,  cursor + 3,color_Index);
                     cursor = cursor + 4;
 
                     if (cursor >= 16) {
-                        string::append_utf8(&mut part, getChunk_(cursor, (buffer as vector<u8>)));
+                        string::append_utf8(&mut part, getChunk_(cursor, (*string::bytes(&buffer))));
                         cursor = 0;
                     };
                 };
@@ -119,7 +160,7 @@ module objectsDAO::MultiPartRLEToSVG {
             };
 
             if (cursor != 0) {
-                string::append_utf8(&mut part, getChunk_(cursor,(buffer as vector<u8>)));
+                string::append_utf8(&mut part, getChunk_(cursor,(*string::bytes(&buffer))));
             };
 
             string::append(&mut rects, part);
