@@ -1,7 +1,8 @@
 module objectsDAO::MultiPartRLEToSVG {
     use std::string;
     use std::ascii;
-    use std::string::String;
+  use std::debug;
+  use std::string::String;
     use std::vector;
     use objectsDAO::Descriptor::{ObjectsDescriptor, get_palettes};
     use sui::bcs;
@@ -117,7 +118,11 @@ module objectsDAO::MultiPartRLEToSVG {
         let p = 0;
         let len = vector::length(&params.parts);
         while (p < len) {
+            // debug::print(&string::utf8(b"params"));
+            // debug::print(&params.parts);
             let image = decodeRLEImage_(*vector::borrow(&params.parts,p));
+            // debug::print(&string::utf8(b"image"));
+            // debug::print(&image);
             let palettes_table = get_palettes(objects_descriptor);
             let palette = table::borrow(palettes_table, image.paletteIndex);
 
@@ -220,15 +225,27 @@ module objectsDAO::MultiPartRLEToSVG {
 
         // extract rect information from byte array
         let len = vector::length(&image);
+        debug::print(&string::utf8(b"len"));
+        debug::print(&len);
         // let rect_count = (len - 5) / 2;
         let rects = vector::empty<Rect>();
         let cursor = 0;
         let i = 5;
         while (i < len) {
+          // debug::print(&string::utf8(b"image"));
+          // debug::print(&image);
+
+          // debug::print(&string::utf8(b"length"));
+          // debug::print(&*vector::borrow(&image, i));
+          // debug::print(&string::utf8(b"colorIndex"));
+          // debug::print(&*vector::borrow(&image, i + 1));
             let new_rect = Rect {
                 length: *vector::borrow(&image, i),
                 colorIndex: *vector::borrow(&image, i + 1)
             };
+
+          debug::print(&string::utf8(b"i + 1"));
+          debug::print(&(i + 1));
             vector::insert(&mut rects, new_rect, cursor);
             cursor = cursor + 1;
             i = i + 2;

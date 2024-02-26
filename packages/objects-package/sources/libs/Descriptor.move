@@ -1,4 +1,5 @@
 module objectsDAO::Descriptor {
+    use std::debug;
     use std::string::String;
     use std::vector;
     use sui::object;
@@ -7,10 +8,12 @@ module objectsDAO::Descriptor {
     use sui::table::Table;
     use sui::transfer;
     use sui::tx_context::TxContext;
-
-
-
-  // const Error:String = b"Palettes can only hold 256 colors";
+    #[test_only]
+    use std::string;
+    #[test_only]
+    use sui::test_scenario;
+    #[test_only]
+    use sui::test_scenario::Scenario;
 
 
   struct ObjectsDescriptor has key,store{
@@ -115,7 +118,9 @@ module objectsDAO::Descriptor {
     assert!(length <= 256u64,1);
     let i = 0;
     while (i < newColors_length){
+
       let new_color = *vector::borrow(&newColors,i);
+      // debug::print(&paletteIndex);
       addColorToPalette(paletteIndex,new_color,objects_descriptor);
       i = i + 1
     }
@@ -190,9 +195,14 @@ module objectsDAO::Descriptor {
      * @notice Add a single color to a color palette.
      */
     public fun addColorToPalette(paletteIndex:u8,color:String,objects_descriptor:&mut ObjectsDescriptor){
-        let colors = table::borrow_mut(&mut objects_descriptor.palettes,paletteIndex);
-        vector::push_back(colors,color);
-        // table::add<u8,vector<String>>(&mut objects_descriptor.palettes,paletteIndex,*colors)
+        let bool = table::contains(&objects_descriptor.palettes,paletteIndex);
+        if (bool){
+          let colors = table::borrow_mut(&mut objects_descriptor.palettes,paletteIndex);
+          vector::push_back(colors,color);
+        }else{
+          let colors =  vector[color];
+          table::add<u8,vector<String>>(&mut objects_descriptor.palettes,paletteIndex,colors)
+        }
     }
 
     /**
@@ -234,6 +244,139 @@ module objectsDAO::Descriptor {
         let i = vector::length(&objects_descriptor.glasses);
         vector::insert(&mut objects_descriptor.glasses, glasses, i);
     }
+
+  #[test_only]
+  public fun init_test(): Scenario {
+    let scenario_val = test_scenario::begin(@0x0001);
+    let scenario = &mut scenario_val;
+    {
+      let ctx = test_scenario::ctx(scenario);
+      init(ctx);
+    };
+    test_scenario::next_tx(scenario,@0x0001);
+    scenario_val
+  }
+
+
+
+
+  #[test]
+  fun test_addColorsToPalette(){
+    let scenario_val = init_test();
+    let scenario = &mut scenario_val;
+    let colors:vector<String> = vector[
+      string::utf8(b""),
+      string::utf8(b"ffffff")
+    ];
+    let paletteIndex:u8 = 0u8;
+    {
+      let ctx = test_scenario::ctx(scenario);
+      init(ctx)
+    };
+    test_scenario::next_tx(scenario,@0x0001);
+    let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
+    addColorsToPalette(paletteIndex,colors,&mut objects_descriptor);
+    test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
+    test_scenario::end(scenario_val);
+  }
+
+
+  #[test]
+  fun test_addManyBackgrounds(){
+    let scenario_val = init_test();
+    let scenario = &mut scenario_val;
+    let backgrounds:vector<String> = vector[
+      string::utf8(b""),
+      string::utf8(b"ffffff")
+    ];
+    {
+      let ctx = test_scenario::ctx(scenario);
+      init(ctx)
+    };
+    test_scenario::next_tx(scenario,@0x0001);
+    let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
+    addManyBackgrounds(backgrounds,&mut objects_descriptor);
+    test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
+    test_scenario::end(scenario_val);
+  }
+
+
+  #[test]
+  fun test_addManyAccessories(){
+    let scenario_val = init_test();
+    let scenario = &mut scenario_val;
+    let accessories:vector<vector<u8>> = vector[
+      b"",
+      b"ffffff"
+    ];
+    {
+      let ctx = test_scenario::ctx(scenario);
+      init(ctx)
+    };
+    test_scenario::next_tx(scenario,@0x0001);
+    let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
+    addManyAccessories(accessories,&mut objects_descriptor);
+    test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
+    test_scenario::end(scenario_val);
+  }
+
+  #[test]
+  fun test_addManyBodies(){
+    let scenario_val = init_test();
+    let scenario = &mut scenario_val;
+    let bodys:vector<vector<u8>> = vector[
+      b"",
+      b"ffffff"
+    ];
+    {
+      let ctx = test_scenario::ctx(scenario);
+      init(ctx)
+    };
+    test_scenario::next_tx(scenario,@0x0001);
+    let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
+    addManyBodies(bodys,&mut objects_descriptor);
+    test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
+    test_scenario::end(scenario_val);
+  }
+
+
+  #[test]
+  fun test_addManyHeads(){
+    let scenario_val = init_test();
+    let scenario = &mut scenario_val;
+    let heads:vector<vector<u8>> = vector[
+      b"",
+      b"ffffff"
+    ];
+    {
+      let ctx = test_scenario::ctx(scenario);
+      init(ctx)
+    };
+    test_scenario::next_tx(scenario,@0x0001);
+    let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
+    addManyHeads(heads,&mut objects_descriptor);
+    test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
+    test_scenario::end(scenario_val);
+  }
+
+  #[test]
+  fun test_addManyGlasses(){
+    let scenario_val = init_test();
+    let scenario = &mut scenario_val;
+    let glasses:vector<vector<u8>> = vector[
+      b"",
+      b"ffffff"
+    ];
+    {
+      let ctx = test_scenario::ctx(scenario);
+      init(ctx)
+    };
+    test_scenario::next_tx(scenario,@0x0001);
+    let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
+    addManyGlasses(glasses,&mut objects_descriptor);
+    test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
+    test_scenario::end(scenario_val);
+  }
 
 
 

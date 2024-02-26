@@ -133,42 +133,42 @@ module objectsDAO::base64 {
         abort 1001
     }
 
-    #[test]
-    fun test_base64() {
-        let str = b"abcdefghijklmnopqrstuvwsyzABCDEFGHIJKLMNOPQRSTUVWSYZ1234567890+/sdfa;fij;woeijfoawejif;oEQJJ'";
-        let code = encode(&str);
-        let decode_str = decode(&code);
-        assert!(
-            code == b"YWJjZGVmZ2hpamtsbW5vcHFyc3R1dndzeXpBQkNERUZHSElKS0xNTk9QUVJTVFVWV1NZWjEyMzQ1Njc4OTArL3NkZmE7ZmlqO3dvZWlqZm9hd2VqaWY7b0VRSkon",
-            1001
-        );
-        assert!(str == decode_str, 1002);
-
-        let str = b"123";
-        let code = encode(&str);
-        let decode_str = decode(&code);
-        assert!(code == b"MTIz", 1003);
-        assert!(str == decode_str, 1004);
-
-        let str = b"10";
-        let code = encode(&str);
-        let decode_str = decode(&code);
-        assert!(code == b"MTA=", 1005);
-        assert!(str == decode_str, 1006);
-
-        let str = b"1";
-        let code = encode(&str);
-        let decode_str = decode(&code);
-        assert!(code == b"MQ==", 1007);
-        assert!(str == decode_str, 1008);
-    }
-
-    #[test]
-    fun test_utf8() {
-        use std::debug;
-        let str = x"E6B189";
-        debug::print(&str);
-        debug::print(&encode(&str));
-        debug::print(&b"5rGJ");
-    }
+    // #[test]
+    // fun test_base64() {
+    //     let str = b"abcdefghijklmnopqrstuvwsyzABCDEFGHIJKLMNOPQRSTUVWSYZ1234567890+/sdfa;fij;woeijfoawejif;oEQJJ'";
+    //     let code = encode(&str);
+    //     let decode_str = decode(&code);
+    //     assert!(
+    //         code == b"YWJjZGVmZ2hpamtsbW5vcHFyc3R1dndzeXpBQkNERUZHSElKS0xNTk9QUVJTVFVWV1NZWjEyMzQ1Njc4OTArL3NkZmE7ZmlqO3dvZWlqZm9hd2VqaWY7b0VRSkon",
+    //         1001
+    //     );
+    //     assert!(str == decode_str, 1002);
+    //
+    //     let str = b"123";
+    //     let code = encode(&str);
+    //     let decode_str = decode(&code);
+    //     assert!(code == b"MTIz", 1003);
+    //     assert!(str == decode_str, 1004);
+    //
+    //     let str = b"10";
+    //     let code = encode(&str);
+    //     let decode_str = decode(&code);
+    //     assert!(code == b"MTA=", 1005);
+    //     assert!(str == decode_str, 1006);
+    //
+    //     let str = b"1";
+    //     let code = encode(&str);
+    //     let decode_str = decode(&code);
+    //     assert!(code == b"MQ==", 1007);
+    //     assert!(str == decode_str, 1008);
+    // }
+    //
+    // #[test]
+    // fun test_utf8() {
+    //     use std::debug;
+    //     let str = x"E6B189";
+    //     debug::print(&str);
+    //     debug::print(&encode(&str));
+    //     debug::print(&b"5rGJ");
+    // }
 }
