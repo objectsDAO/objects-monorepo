@@ -16,8 +16,12 @@ module objectsDAO::ObjectsSeeder {
         glasses:u64
   }
 
+  // public entry fun mint(){
+  //
+  // }
 
-  public fun generateSeed(object_id:u256, objects_descriptor:&mut ObjectsDescriptor,clock: &Clock):Seed {
+
+  public entry fun generateSeed(object_id:u256, objects_descriptor:&mut ObjectsDescriptor,clock: &Clock):Seed {
       let randomness =  (clock::timestamp_ms(clock) as u256) + object_id;
 
       let backgroundCount = backgroundCount(objects_descriptor);
@@ -58,4 +62,9 @@ module objectsDAO::ObjectsSeeder {
     let svg= generateSVG(params,objects_descriptor);
     svg
   }
+
+  // #[test]
+  // fun test_generateSeed(){
+  //   let objects_id = 0
+  // }
 }

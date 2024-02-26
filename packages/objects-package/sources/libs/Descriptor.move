@@ -1,12 +1,16 @@
 module objectsDAO::Descriptor {
     use std::string::String;
     use std::vector;
-  use sui::object;
-  use sui::object::UID;
-  use sui::table;
-  use sui::table::Table;
+    use sui::object;
+    use sui::object::UID;
+    use sui::table;
+    use sui::table::Table;
     use sui::transfer;
-  use sui::tx_context::TxContext;
+    use sui::tx_context::TxContext;
+
+
+
+  // const Error:String = b"Palettes can only hold 256 colors";
 
 
   struct ObjectsDescriptor has key,store{
@@ -80,53 +84,9 @@ module objectsDAO::Descriptor {
       (vector::length(&objects_descriptor.glasses) as u256)
     }
 
-    /**
-     * @notice Add a single color to a color palette.
-     */
-    public fun addColorToPalette_(paletteIndex:u8,color:vector<String>,objects_descriptor:&mut ObjectsDescriptor){
-        table::add<u8,vector<String>>(&mut objects_descriptor.palettes,paletteIndex,color)
+    public fun get_palettes(objects_descriptor:&ObjectsDescriptor):&Table<u8,vector<String>>{
+      &objects_descriptor.palettes
     }
-
-    /**
-     * @notice Add a Noun background.
-     */
-    public fun addBackground_(background:String,objects_descriptor:&mut ObjectsDescriptor) {
-        let i = vector::length(&objects_descriptor.backgrounds);
-        vector::insert(&mut objects_descriptor.backgrounds, background, i);
-    }
-
-    /**
-     * @notice Add a Noun body.
-     */
-    public fun addBody_(body:vector<u8>,objects_descriptor:&mut ObjectsDescriptor) {
-        let i = vector::length(&objects_descriptor.bodies);
-        vector::insert(&mut objects_descriptor.bodies, body, i);
-    }
-
-    /**
-     * @notice Add a Noun accessory.
-     */
-    public fun addAccessory_(accessory:vector<u8>,objects_descriptor:&mut ObjectsDescriptor){
-        let i = vector::length(&objects_descriptor.accessories);
-        vector::insert(&mut objects_descriptor.accessories, accessory, i);
-    }
-
-    /**
-     * @notice Add a Noun head.
-     */
-    public fun addHead_(head:vector<u8>,objects_descriptor:&mut ObjectsDescriptor) {
-        let i = vector::length(&objects_descriptor.heads);
-        vector::insert(&mut objects_descriptor.heads, head, i);
-    }
-
-    /**
-     * @notice Add Noun glasses.
-     */
-    public fun addGlasses_(glasses:vector<u8>,objects_descriptor:&mut ObjectsDescriptor) {
-        let i = vector::length(&objects_descriptor.glasses);
-        vector::insert(&mut objects_descriptor.glasses, glasses, i);
-    }
-
 
     public fun get_backgrounds(objects_descriptor:&ObjectsDescriptor):&vector<String>{
       &objects_descriptor.backgrounds
@@ -148,8 +108,131 @@ module objectsDAO::Descriptor {
       &objects_descriptor.glasses
     }
 
-    public fun get_palettes(objects_descriptor:&ObjectsDescriptor):&Table<u8,vector<String>>{
-      &objects_descriptor.palettes
+  public entry fun addColorsToPalette(paletteIndex:u8,newColors:vector<String>,objects_descriptor:&mut ObjectsDescriptor){
+    let palettes_length = table::length<u8,vector<String>>(&objects_descriptor.palettes);
+    let newColors_length = vector::length(&newColors);
+    let length = palettes_length + newColors_length;
+    assert!(length <= 256u64,1);
+    let i = 0;
+    while (i < newColors_length){
+      let new_color = *vector::borrow(&newColors,i);
+      addColorToPalette(paletteIndex,new_color,objects_descriptor);
+      i = i + 1
+    }
+  }
+
+  public entry fun addManyBackgrounds(backgrounds:vector<String>,objects_descriptor:&mut ObjectsDescriptor){
+    let backgrounds_length = vector::length(&backgrounds);
+    let i = 0;
+    while (i < backgrounds_length){
+      let background = *vector::borrow(&backgrounds,i);
+      addBackground(background,objects_descriptor);
+      i = i + 1
+    }
+  }
+    /**
+     * @notice Batch add Noun accessories.
+     * @dev This function can only be called by the owner when not locked.
+     */
+  public entry fun addManyAccessories(accessories:vector<vector<u8>>,objects_descriptor:&mut ObjectsDescriptor){
+    let accessories_length = vector::length(&accessories);
+    let i = 0;
+    while (i < accessories_length){
+      let access = *vector::borrow(&accessories,i);
+      addAccessory(access,objects_descriptor);
+      i = i + 1
+    }
+  }
+
+  /**
+   * @notice Batch add Noun bodies.
+   * @dev This function can only be called by the owner when not locked.
+   */
+  public entry fun addManyBodies(bodies:vector<vector<u8>>,objects_descriptor:&mut ObjectsDescriptor){
+    let bodies_length = vector::length(&bodies);
+    let i = 0;
+    while (i < bodies_length){
+      let body = *vector::borrow(&bodies,i);
+      addBody(body,objects_descriptor);
+      i = i + 1
+    }
+  }
+
+    /**
+     * @notice Batch add Noun heads.
+     * @dev This function can only be called by the owner when not locked.
+     */
+    public entry fun addManyHeads(heads:vector<vector<u8>>,objects_descriptor:&mut ObjectsDescriptor){
+      let heads_length = vector::length(&heads);
+      let i = 0;
+      while (i < heads_length){
+      let head = *vector::borrow(&heads,i);
+        addHead(head,objects_descriptor);
+        i = i + 1
+      }
+    }
+
+    /**
+     * @notice Batch add Noun glasses.
+     * @dev This function can only be called by the owner when not locked.
+     */
+    public entry fun addManyGlasses(glasses:vector<vector<u8>>,objects_descriptor:&mut ObjectsDescriptor){
+      let glasses_length = vector::length(&glasses);
+      let i = 0;
+      while (i < glasses_length){
+          let glass = *vector::borrow(&glasses,i);
+          addGlasses(glass,objects_descriptor);
+        i = i + 1
+      }
+    }
+
+    /**
+     * @notice Add a single color to a color palette.
+     */
+    public fun addColorToPalette(paletteIndex:u8,color:String,objects_descriptor:&mut ObjectsDescriptor){
+        let colors = table::borrow_mut(&mut objects_descriptor.palettes,paletteIndex);
+        vector::push_back(colors,color);
+        // table::add<u8,vector<String>>(&mut objects_descriptor.palettes,paletteIndex,*colors)
+    }
+
+    /**
+     * @notice Add a Noun background.
+     */
+    public fun addBackground(background:String,objects_descriptor:&mut ObjectsDescriptor) {
+        let i = vector::length(&objects_descriptor.backgrounds);
+        vector::insert(&mut objects_descriptor.backgrounds, background, i);
+    }
+
+    /**
+     * @notice Add a Noun body.
+     */
+    public fun addBody(body:vector<u8>,objects_descriptor:&mut ObjectsDescriptor) {
+        let i = vector::length(&objects_descriptor.bodies);
+        vector::insert(&mut objects_descriptor.bodies, body, i);
+    }
+
+    /**
+     * @notice Add a Noun accessory.
+     */
+    public fun addAccessory(accessory:vector<u8>,objects_descriptor:&mut ObjectsDescriptor){
+        let i = vector::length(&objects_descriptor.accessories);
+        vector::insert(&mut objects_descriptor.accessories, accessory, i);
+    }
+
+    /**
+     * @notice Add a Noun head.
+     */
+    public fun addHead(head:vector<u8>,objects_descriptor:&mut ObjectsDescriptor) {
+        let i = vector::length(&objects_descriptor.heads);
+        vector::insert(&mut objects_descriptor.heads, head, i);
+    }
+
+    /**
+     * @notice Add Noun glasses.
+     */
+    public fun addGlasses(glasses:vector<u8>,objects_descriptor:&mut ObjectsDescriptor) {
+        let i = vector::length(&objects_descriptor.glasses);
+        vector::insert(&mut objects_descriptor.glasses, glasses, i);
     }
 
 
