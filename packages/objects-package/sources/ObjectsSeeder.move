@@ -62,7 +62,7 @@ module objectsDAO::ObjectsSeeder {
     }
   }
 
-  fun generateSVGImage(seed: Seed, objects_descriptor: &ObjectsDescriptor): String {
+  fun generateSVGImage(seed: Seed, objects_descriptor: &mut ObjectsDescriptor): String {
     let parts = getPartsForSeed_(seed, objects_descriptor);
     let backgrounds = get_backgrounds(objects_descriptor);
     let background = *vector::borrow(backgrounds, seed.background);
@@ -86,7 +86,7 @@ module objectsDAO::ObjectsSeeder {
     let head = *vector::borrow(heads, seed.head);
     let glasses = *vector::borrow(glasses, seed.glasses);
 
-    let parts: vector<vector<u8>> = vector[body, accessory, head, glasses];
+    let parts: vector<u8> = vector[body, accessory, head, glasses];
     parts
   }
 

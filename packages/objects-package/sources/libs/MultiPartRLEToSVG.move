@@ -1,17 +1,17 @@
 module objectsDAO::MultiPartRLEToSVG {
     use std::string;
     use std::ascii;
-  use std::debug;
-  use std::string::String;
+    use std::debug;
+    use std::string::String;
     use std::vector;
-    use objectsDAO::Descriptor::{ObjectsDescriptor, get_palettes};
+    use objectsDAO::Descriptor::{ObjectsDescriptor, get_palettes, get_mut_palettes};
     use sui::bcs;
     use sui::table;
 
 
 
     struct SVGParams has drop {
-        parts:vector<vector<u8>>,
+        parts:vector<u8>,
         background:String
     }
 
@@ -31,6 +31,7 @@ module objectsDAO::MultiPartRLEToSVG {
     struct DecodedImage has drop {
         paletteIndex: u8,
         bounds: ContentBounds,
+        width:u256,
         rects: vector<Rect>
     }
 
@@ -38,7 +39,7 @@ module objectsDAO::MultiPartRLEToSVG {
         return (rect.length,rect.colorIndex)
     }
 
-    public fun create_svg_params(parts:vector<vector<u8>>,background:String):SVGParams{
+    public fun create_svg_params(parts:vector<u8>,background:String):SVGParams{
         SVGParams{
             parts,
             background
@@ -48,15 +49,20 @@ module objectsDAO::MultiPartRLEToSVG {
     /**
      * @notice Given RLE image parts and color palettes, merge to generate a single SVG image.
      */
-    public fun generateSVG(params:SVGParams,objects_descriptor:&ObjectsDescriptor): String {
+    public fun generateSVG(params:SVGParams,objects_descriptor:&mut ObjectsDescriptor): String {
         let svg = string::utf8(b"");
 
+
+        //header
         let svg_header = string::utf8(b"<svg width='320' height='320' viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg' shape-rendering='crispEdges'>");
+
+        //body
         let rect = string::utf8(b"<rect width='100%' height='100%' fill='#");
         let background = params.background;
         let rect_tail =  string::utf8(b"' />");
 
         let svg_rect = generateSVGRects_(params, objects_descriptor);
+
         let svg_tail = string::utf8(b"</svg>");
 
         string::append(&mut svg, svg_header);
@@ -76,7 +82,7 @@ module objectsDAO::MultiPartRLEToSVG {
     /**
      * @notice Given RLE image parts and color palettes, generate SVG rects.
      */
-    public fun generateSVGRects_(params:SVGParams,objects_descriptor:&ObjectsDescriptor): vector<u8> {
+    public fun generateSVGRects_(params:SVGParams,objects_descriptor:&mut ObjectsDescriptor): vector<u8> {
         let lookup:vector<String> =
           vector[
             string::utf8(b"0"),
@@ -121,10 +127,21 @@ module objectsDAO::MultiPartRLEToSVG {
             // debug::print(&string::utf8(b"params"));
             // debug::print(&params.parts);
             let image = decodeRLEImage_(*vector::borrow(&params.parts,p));
-            // debug::print(&string::utf8(b"image"));
-            // debug::print(&image);
-            let palettes_table = get_palettes(objects_descriptor);
+            debug::print(&string::utf8(b"image.paletteIndex"));
+            debug::print(&image.paletteIndex);
+
+            let palettes_table = get_mut_palettes(objects_descriptor);
+
+            // debug::print(&string::utf8(b"palettes_table"));
+            // debug::print(&table::contains(palettes_table,image.paletteIndex));
+            let bool = table::contains(palettes_table, image.paletteIndex);
+            if (!bool) {
+              table::add(palettes_table, image.paletteIndex,vector[string::utf8(b"")]);
+            };
+
             let palette = table::borrow(palettes_table, image.paletteIndex);
+
+
 
             let currentX = image.bounds.left;
             let currentY = image.bounds.top;
@@ -140,6 +157,9 @@ module objectsDAO::MultiPartRLEToSVG {
                 let (_length,color_index) = get_rect_length_and_colorIndex(rect);
 
                 if (color_index != 0) {
+                    debug::print(&rect.length);
+                    debug::print(&color_index);
+
                     let width = *vector::borrow(&lookup,(rect.length as u64));
                     let x = *vector::borrow(&lookup,(currentX as u64));
                     let y = *vector::borrow(&lookup,(currentY as u64));
@@ -212,9 +232,12 @@ module objectsDAO::MultiPartRLEToSVG {
      * @notice Decode a single RLE compressed image into a `DecodedImage`.
      */
     public fun decodeRLEImage_(image: vector<u8>): DecodedImage {
+        debug::print(&string::utf8(b"image"));
+        debug::print(&image);
         // extract palette index from byte array
         let paletteIndex = *vector::borrow(&image, 0);
-
+        // debug::print(&string::utf8(b"paletteIndex"));
+        // debug::print(&paletteIndex);
         // extract content bounds from byte array
         let bounds = ContentBounds {
             top: *vector::borrow(&image, 1),
@@ -223,29 +246,33 @@ module objectsDAO::MultiPartRLEToSVG {
             left: *vector::borrow(&image, 4)
         };
 
-        // extract rect information from byte array
+        let width:u256 = (bounds.right - bounds.left as u256);
+
         let len = vector::length(&image);
-        debug::print(&string::utf8(b"len"));
-        debug::print(&len);
         // let rect_count = (len - 5) / 2;
         let rects = vector::empty<Rect>();
         let cursor = 0;
         let i = 5;
+
+
         while (i < len) {
-          // debug::print(&string::utf8(b"image"));
-          // debug::print(&image);
 
-          // debug::print(&string::utf8(b"length"));
-          // debug::print(&*vector::borrow(&image, i));
-          // debug::print(&string::utf8(b"colorIndex"));
-          // debug::print(&*vector::borrow(&image, i + 1));
+            let length = *vector::borrow(&image, i);
+            let color_index = 0;
+
+            // if ( (i+1) != len) {
+            //   color_index = *vector::borrow(&image, i + 1);
+            // };
+
             let new_rect = Rect {
-                length: *vector::borrow(&image, i),
-                colorIndex: *vector::borrow(&image, i + 1)
+              length,
+              colorIndex:color_index
             };
+            // debug::print(&string::utf8(b"new_rect"));
+            // debug::print(&new_rect);
 
-          debug::print(&string::utf8(b"i + 1"));
-          debug::print(&(i + 1));
+          // debug::print(&string::utf8(b"i + 1"));
+          // debug::print(&(i + 1));
             vector::insert(&mut rects, new_rect, cursor);
             cursor = cursor + 1;
             i = i + 2;
@@ -254,6 +281,7 @@ module objectsDAO::MultiPartRLEToSVG {
         return DecodedImage {
             paletteIndex: paletteIndex,
             bounds: bounds,
+            width,
             rects: rects
         }
     }
