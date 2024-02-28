@@ -10,7 +10,7 @@ module objectsDAO::MultiPartRLEToSVG {
 
 
     struct SVGParams has drop {
-        parts:vector<vector<u8>>,
+        parts:vector<String>,
         background:String
     }
 
@@ -37,7 +37,7 @@ module objectsDAO::MultiPartRLEToSVG {
         return (rect.length,rect.colorIndex)
     }
 
-    public fun create_svg_params(parts:vector<vector<u8>,>,background:String):SVGParams{
+    public fun create_svg_params(parts:vector<String>,background:String):SVGParams{
         SVGParams{
             parts,
             background
@@ -235,7 +235,8 @@ module objectsDAO::MultiPartRLEToSVG {
     /**
      * @notice Decode a single RLE compressed image into a `DecodedImage`.
      */
-    public fun decodeRLEImage_(image: vector<u8>): DecodedImage {
+    public fun decodeRLEImage_(image: String): DecodedImage {
+        let image = *string::bytes(&image);
         // debug::print(&string::utf8(b"image"));
         // debug::print(&image);
         // extract palette index from byte array
@@ -265,6 +266,7 @@ module objectsDAO::MultiPartRLEToSVG {
             // debug::print(&string::utf8(b"i"));
             // debug::print(&i);
             let length = *vector::borrow(&image, i);
+            // let length = *vector::borrow(&image, i);
             let color_index = 0;
 
             let new_rect = Rect {
