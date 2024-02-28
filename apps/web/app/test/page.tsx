@@ -4,24 +4,29 @@ import { ImageData, getNounData, getRandomNounSeed } from '@nouns/assets';
 import { buildSVG, PNGCollectionEncoder } from '@nouns/sdk';
 import Image from 'next/image'
 import {NounSeed} from "@nouns/assets/dist/types";
+import {decodeImage} from "@nouns/sdk/dist/image/svg-builder";
 
 export default async function Page() {
   // const seed = {...getRandomNounSeed()};
   const seed:NounSeed = {
       background:1,
-      body: 9,
-      accessory: 112,
-      head: 39,
-      glasses: 0,
+      body: 7,
+      accessory: 110,
+      head: 37,
+      glasses: 19,
 
   }
-
-  console.log(seed);
+  console.log(seed)
   const {parts, background} = getNounData(seed);
   // console.log(parts,background);
   const encoder = await new PNGCollectionEncoder(ImageData.palette);
-  console.log(encoder.data.palette)
+  // console.log(encoder.data.palette)
   const svg = buildSVG(parts, encoder.data.palette, background);
+  // @ts-ignore
+  const { bounds, rects } =   decodeImage(parts[0].data)
+    // @ts-ignore
+  console.log(parts)
+  console.log(bounds)
   // console.log(svg);
   // const generateNounSvg = useCallback(
   //   (amount: number = 1) => {

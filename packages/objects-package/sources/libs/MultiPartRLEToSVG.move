@@ -123,10 +123,10 @@ module objectsDAO::MultiPartRLEToSVG {
 
 
         while (p < len) {
-            debug::print(&string::utf8(b"len"));
-            debug::print(&len);
-            debug::print(&string::utf8(b"p"));
-            debug::print(&p);
+            // debug::print(&string::utf8(b"len"));
+            // debug::print(&len);
+            // debug::print(&string::utf8(b"vector::borrow(&params.parts,p)"));
+            // debug::print(vector::borrow(&params.parts,p));
             let image = decodeRLEImage_(*vector::borrow(&params.parts,p));
             // debug::print(&string::utf8(b"image.paletteIndex"));
             // debug::print(&image.paletteIndex);
@@ -250,6 +250,9 @@ module objectsDAO::MultiPartRLEToSVG {
             left: *vector::borrow(&image, 4)
         };
 
+        debug::print(&string::utf8(b"bounds"));
+        debug::print(&bounds);
+
         let len = vector::length(&image);
         // let rect_count = (len - 5) / 2;
         let rects = vector::empty<Rect>();
@@ -259,14 +262,10 @@ module objectsDAO::MultiPartRLEToSVG {
 
         while (i < len) {
 
-            debug::print(&string::utf8(b"i"));
-            debug::print(&i);
+            // debug::print(&string::utf8(b"i"));
+            // debug::print(&i);
             let length = *vector::borrow(&image, i);
             let color_index = 0;
-
-            // if ( (i+1) != len) {
-            //   color_index = *vector::borrow(&image, i + 1);
-            // };
 
             let new_rect = Rect {
               length,

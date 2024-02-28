@@ -1,14 +1,16 @@
 module objectsDAO::Descriptor {
+  use std::debug;
+  use std::string;
   use std::string::String;
   use std::vector;
+  use sui::hex;
   use sui::object;
   use sui::object::UID;
   use sui::table;
   use sui::table::Table;
   use sui::transfer;
   use sui::tx_context::TxContext;
-  #[test_only]
-  use std::string;
+
   #[test_only]
   use sui::test_scenario;
   #[test_only]
@@ -165,6 +167,8 @@ module objectsDAO::Descriptor {
     let i = 0;
     while (i < bodies_length) {
       let body = *vector::borrow(&bodies, i);
+      debug::print(&string::utf8(b"body"));
+      debug::print(&body);
       addBody(body, objects_descriptor);
       i = i + 1
     }
@@ -216,40 +220,47 @@ module objectsDAO::Descriptor {
    * @notice Add a Noun background.
    */
   public fun addBackground(background: String, objects_descriptor: &mut ObjectsDescriptor) {
-    let i = vector::length(&objects_descriptor.backgrounds);
-    vector::insert(&mut objects_descriptor.backgrounds, background, i);
+    // let i = vector::length(&objects_descriptor.backgrounds);
+    // vector::insert(&mut objects_descriptor.backgrounds, background, i);
+
+    vector::push_back(&mut objects_descriptor.backgrounds, background);
   }
 
   /**
    * @notice Add a Noun body.
    */
   public fun addBody(body: vector<u8>, objects_descriptor: &mut ObjectsDescriptor) {
-    let i = vector::length(&objects_descriptor.bodies);
-    vector::insert(&mut objects_descriptor.bodies, body, i);
+    // let i = vector::length(&objects_descriptor.bodies);
+    // vector::insert(&mut objects_descriptor.bodies, body, i);
+    // let body = hex::decode(body);
+    vector::push_back(&mut objects_descriptor.bodies, body);
   }
 
   /**
    * @notice Add a Noun accessory.
    */
   public fun addAccessory(accessory: vector<u8>, objects_descriptor: &mut ObjectsDescriptor) {
-    let i = vector::length(&objects_descriptor.accessories);
-    vector::insert(&mut objects_descriptor.accessories, accessory, i);
+    // let i = vector::length(&objects_descriptor.accessories);
+    // vector::insert(&mut objects_descriptor.accessories, accessory, i);
+    vector::push_back(&mut objects_descriptor.accessories, accessory);
   }
 
   /**
    * @notice Add a Noun head.
    */
   public fun addHead(head: vector<u8>, objects_descriptor: &mut ObjectsDescriptor) {
-    let i = vector::length(&objects_descriptor.heads);
-    vector::insert(&mut objects_descriptor.heads, head, i);
+    // let i = vector::length(&objects_descriptor.heads);
+    // vector::insert(&mut objects_descriptor.heads, head, i);
+    vector::push_back(&mut objects_descriptor.heads, head);
   }
 
   /**
    * @notice Add Noun glasses.
    */
   public fun addGlasses(glasses: vector<u8>, objects_descriptor: &mut ObjectsDescriptor) {
-    let i = vector::length(&objects_descriptor.glasses);
-    vector::insert(&mut objects_descriptor.glasses, glasses, i);
+    // let i = vector::length(&objects_descriptor.glasses);
+    // vector::insert(&mut objects_descriptor.glasses, glasses, i);
+    vector::push_back(&mut objects_descriptor.glasses, glasses);
   }
 
   #[test_only]
