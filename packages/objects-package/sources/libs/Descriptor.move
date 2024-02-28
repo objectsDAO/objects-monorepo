@@ -1,8 +1,6 @@
 module objectsDAO::Descriptor {
-  use std::debug;
   use std::string::String;
   use std::vector;
-  use sui::hex;
   use sui::object;
   use sui::object::UID;
   use sui::table;
@@ -16,8 +14,7 @@ module objectsDAO::Descriptor {
   #[test_only]
   use sui::test_scenario::Scenario;
 
-  const EInvalidHexLength: u64 = 0;
-  const ENotValidHexCharacter: u64 = 1;
+
 
   struct ObjectsDescriptor has key, store {
     id: UID,
@@ -26,13 +23,13 @@ module objectsDAO::Descriptor {
     // Noun Backgrounds (Hex Colors)
     backgrounds: vector<String>,
     // Noun Bodies (Custom RLE)
-    bodies: vector<u8>,
+    bodies: vector<vector<u8>>,
     // Noun Accessories (Custom RLE)
-    accessories: vector<u8>,
+    accessories: vector<vector<u8>>,
     // Noun Heads (Custom RLE)
-    heads: vector<u8>,
+    heads: vector<vector<u8>>,
     // Noun Glasses (Custom RLE)
-    glasses: vector<u8>
+    glasses: vector<vector<u8>>
   }
 
   fun init(ctx: &mut TxContext) {
@@ -43,13 +40,13 @@ module objectsDAO::Descriptor {
       // Noun Backgrounds (Hex Colors)
       backgrounds: vector::empty<String>(),
       // Noun Bodies (Custom RLE)
-      bodies: vector::empty<>(),
+      bodies: vector::empty<vector<u8>>(),
       // Noun Accessories (Custom RLE)
-      accessories: vector::empty<>(),
+      accessories: vector::empty<vector<u8>>(),
       // Noun Heads (Custom RLE)
-      heads: vector::empty<>(),
+      heads: vector::empty<vector<u8>>(),
       // Noun Glasses (Custom RLE)
-      glasses: vector::empty<>(),
+      glasses: vector::empty<vector<u8>>(),
     };
     // Transfer the forge object to the module/package publisher
     transfer::public_share_object(objects_descriptor);
@@ -102,19 +99,19 @@ module objectsDAO::Descriptor {
     &objects_descriptor.backgrounds
   }
 
-  public fun get_bodies(objects_descriptor: &ObjectsDescriptor): &vector<u8> {
+  public fun get_bodies(objects_descriptor: &ObjectsDescriptor): &vector<vector<u8>> {
     &objects_descriptor.bodies
   }
 
-  public fun get_accessories(objects_descriptor: &ObjectsDescriptor): &vector<u8> {
+  public fun get_accessories(objects_descriptor: &ObjectsDescriptor): &vector<vector<u8>> {
     &objects_descriptor.accessories
   }
 
-  public fun get_heads(objects_descriptor: &ObjectsDescriptor): &vector<u8> {
+  public fun get_heads(objects_descriptor: &ObjectsDescriptor): &vector<vector<u8>> {
     &objects_descriptor.heads
   }
 
-  public fun get_glasses(objects_descriptor: &ObjectsDescriptor): &vector<u8> {
+  public fun get_glasses(objects_descriptor: &ObjectsDescriptor): &vector<vector<u8>> {
     &objects_descriptor.glasses
   }
 
@@ -251,28 +248,9 @@ module objectsDAO::Descriptor {
    * @notice Add Noun glasses.
    */
   public fun addGlasses(glasses: vector<u8>, objects_descriptor: &mut ObjectsDescriptor) {
-    let (i, l) = (0,  vector::length(&glasses));
-    assert!(l % 2 == 0, EInvalidHexLength);
-    while (i < l) {
-      let decimal = (decode_byte(*vector::borrow(&glasses, i)) * 16) +
-          decode_byte(*vector::borrow(&glasses, i + 1));
-      vector::push_back(&mut objects_descriptor.glasses, decimal);
-      i = i + 2;
-    };
+    let i = vector::length(&objects_descriptor.glasses);
+    vector::insert(&mut objects_descriptor.glasses, glasses, i);
   }
-
-  fun decode_byte(hex: u8): u8 {
-    if (/* 0 .. 9 */ 48 <= hex && hex < 58) {
-      hex - 48
-    } else if (/* A .. F */ 65 <= hex && hex < 71) {
-      10 + hex - 65
-    } else if (/* a .. f */ 97 <= hex && hex < 103) {
-      10 + hex - 97
-    } else {
-      abort ENotValidHexCharacter
-    }
-  }
-
 
   #[test_only]
   public fun init_test(): Scenario {
