@@ -1,9 +1,7 @@
 module objectsDAO::Descriptor {
-  use std::debug;
   use std::string;
   use std::string::String;
   use std::vector;
-  use sui::hex;
   use sui::object;
   use sui::object::UID;
   use sui::table;

@@ -15,10 +15,8 @@ module objectsDAO::ObjectsSeeder {
   use objectsDAO::Descriptor::{init_test, addColorsToPalette, addManyBackgrounds, addManyAccessories, addManyGlasses,
     addManyHeads, addManyBodies
   };
-  #[test_only]
-  use objectsDAO::base64;
-  #[test_only]
-  use sui::hex;
+
+
 
   #[test_only]
   use sui::test_scenario;
@@ -36,9 +34,9 @@ module objectsDAO::ObjectsSeeder {
     seed: Seed
   }
 
-  struct SVG has copy, drop {
-    svg: String
-  }
+  // struct SVG has copy, drop {
+  //   svg: String
+  // }
 
 
   struct Random has copy,drop{
@@ -95,8 +93,14 @@ module objectsDAO::ObjectsSeeder {
     }
   }
 
-  fun generateSVGImage(seed: Seed, objects_descriptor: &mut ObjectsDescriptor): vector<u8> {
+  fun generateSVGImage(seed: Seed, objects_descriptor: &mut ObjectsDescriptor): String {
     let parts = getPartsForSeed_(seed, objects_descriptor);
+    debug::print(&string::utf8(b"parts"));
+    debug::print(&string::utf8(b"parts"));
+    debug::print(&string::utf8(b"parts"));
+    debug::print(&string::utf8(b"parts"));
+    debug::print(&parts);
+
     let backgrounds = get_backgrounds(objects_descriptor);
     let background = *vector::borrow(backgrounds, seed.background);
     // debug::print(&b"background");
@@ -156,7 +160,7 @@ module objectsDAO::ObjectsSeeder {
   fun testSeed() {
     let scenario_val = init_test();
     let scenario = &mut scenario_val;
-    let object_id: u256 = 1u256;
+    let object_id: u256 = 2u256;
 
     let clock = clock::create_for_testing(test_scenario::ctx(scenario));
     clock::set_for_testing(&mut clock,1709126369766);
@@ -878,7 +882,7 @@ module objectsDAO::ObjectsSeeder {
   fun test_generateSVGImage() {
     let scenario_val = init_test();
     let scenario = &mut scenario_val;
-    let object_id: u256 = 1u256;
+    let object_id: u256 = 2u256;
 
     let clock = clock::create_for_testing(test_scenario::ctx(scenario));
     clock::set_for_testing(&mut clock,1709126369766);
@@ -888,8 +892,8 @@ module objectsDAO::ObjectsSeeder {
 
     let colors: vector<String> = vector[
       string::utf8(b""),
-      string::utf8(b"ffffff"),
       string::utf8(b"c5b9a1"),
+      string::utf8(b"ffffff"),
       string::utf8(b"cfc2ab"),
       string::utf8(b"63a0f9"),
       string::utf8(b"807f7e"),
@@ -897,6 +901,7 @@ module objectsDAO::ObjectsSeeder {
       string::utf8(b"5648ed"),
       string::utf8(b"5a423f"),
       string::utf8(b"b9185c"),
+      string::utf8(b"cbc1bc"),
       string::utf8(b"b87b11"),
       string::utf8(b"fffdf2"),
       string::utf8(b"4b4949"),
@@ -1045,7 +1050,6 @@ module objectsDAO::ObjectsSeeder {
       string::utf8(b"42ffb0"),
       string::utf8(b"d56333"),
       string::utf8(b"b8ced2"),
-      string::utf8(b"b91b43"),
       string::utf8(b"f39713"),
       string::utf8(b"e8e8e2"),
       string::utf8(b"ec5b43"),
@@ -1125,7 +1129,6 @@ module objectsDAO::ObjectsSeeder {
       string::utf8(b"f8ce47"),
       string::utf8(b"395ed1"),
       string::utf8(b"ffc5f0"),
-      string::utf8(b"cbc1bc"),
       string::utf8(b"d4cfc0"),
     ];
     let paletteIndex: u8 = 0u8;
@@ -1589,12 +1592,7 @@ module objectsDAO::ObjectsSeeder {
 
 
     let seed = generateSeed(object_id, &clock, &mut objects_descriptor);
-    debug::print(&string::utf8(b"seed"));
-    debug::print(&seed);
-    let svg = base64::encode(&generateSVGImage(seed, &mut objects_descriptor)) ;
-    debug::print(&b"svg");
-    debug::print(&svg);
-
+    let _svg = &generateSVGImage(seed, &mut objects_descriptor);
     clock::destroy_for_testing(clock);
     test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
     test_scenario::end(scenario_val);
@@ -2315,12 +2313,12 @@ module objectsDAO::ObjectsSeeder {
     addManyGlasses(glasses, &mut objects_descriptor);
 
     let seed = generateSeed(object_id, &clock, &mut objects_descriptor);
-    debug::print(&string::utf8(b"seed"));
-    debug::print(&seed);
+    // debug::print(&string::utf8(b"seed"));
+    // debug::print(&seed);
 
-    let parts = getPartsForSeed_(seed, &mut objects_descriptor);
-    debug::print(&string::utf8(b"parts"));
-    debug::print(&parts);
+    let _parts = getPartsForSeed_(seed, &objects_descriptor);
+    // debug::print(&string::utf8(b"parts"));
+    // debug::print(&parts);
 
     clock::destroy_for_testing(clock);
     test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
