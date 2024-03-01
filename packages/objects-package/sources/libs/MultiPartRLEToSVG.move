@@ -1,10 +1,11 @@
-module objectsDAO::MultiPartRLEToSVG {
+module objectsDAO::multi_part_rel_to_svg {
     use std::string;
     use std::ascii;
-    use std::debug;
-    use std::string::{String};
+  use std::debug;
+  use std::string::{String};
     use std::vector;
-    use objectsDAO::Descriptor::{ObjectsDescriptor, get_mut_palettes};
+    use objectsDAO::base64;
+    use objectsDAO::descriptor::{ObjectsDescriptor, get_mut_palettes};
     use sui::table;
 
     const EInvalidHexLength: u64 = 0;
@@ -66,14 +67,18 @@ module objectsDAO::MultiPartRLEToSVG {
         string::append(&mut svg, svg_rect);
         string::append(&mut svg, svg_tail);
 
+        // debug::print(&string::utf8(b"svgsvgsvgsvgsvgsvgsvg"));
+        // debug::print(&svg);
 
-        debug::print(&string::utf8(b"svgsvgsvgsvgsvgsvgsvg"));
-        debug::print(&svg);
+        let base_64_svg = base64::encode(string::bytes(&svg));
+        let base_64_string = string::utf8(base_64_svg);
+        // debug::print(&string::utf8(b"svgsvgsvgsvgsvgsvgsvg"));
+        // debug::print(&svg);
         // let to_ascii = string::to_ascii(svg);
         // // let to_bytes = ascii::into_bytes(to_ascii);
         // let to_bytes = ascii::into_bytes(to_ascii);
         // return to_bytes
-        svg
+      base_64_string
     }
 
 

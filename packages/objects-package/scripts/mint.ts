@@ -7,21 +7,21 @@ import {OBJECT} from "./package";
 const main =  async () =>{
 
 
-  const package_address = '0x8354a55741b6eb7f7720c78027bc659627e77e821b6321f09d48c931375bee23'
+  const package_address = '0x60c5c57650f9ed5006a26c3c832455f1d7a3aef80b62a74c8f4b0a5f50b18b3b'
 
   const suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
   const keypair = Ed25519Keypair.fromSecretKey(Buffer.from("0bc2bd8d2135c9c0ea18d56cb0b021788e79c7fdf3435c455a049ee92c532a57", 'hex'))
   const txb = new TransactionBlock();
-  // 10sui
-  txb.setGasBudget(10000000000)
+  // 5sui
+  txb.setGasBudget(5000000000)
 
 
-  const descriptor = txb.pure('0xdc77eee8deff2383866a8a47e148ec87b740279ac862250ee2aafe90739ed4f4')
+  const descriptor = txb.pure('0xb9eed160832edf5ec64b1d2fb0fb035bb9d580f77bf28dd0926a59149bc02bb8')
 
 
   txb.moveCall(
     {
-      target:`${package_address}::ObjectsSeeder::mint`,
+      target:`${package_address}::objects_seeder::mint`,
       arguments: [txb.pure(0),txb.pure("0x6"),descriptor],
     }
   )

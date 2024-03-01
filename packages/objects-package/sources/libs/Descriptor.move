@@ -1,4 +1,4 @@
-module objectsDAO::Descriptor {
+module objectsDAO::descriptor {
   use std::string;
   use std::string::String;
   use std::vector;
@@ -272,6 +272,10 @@ module objectsDAO::Descriptor {
     test_scenario::next_tx(scenario, @0x0001);
     scenario_val
   }
+
+
+
+
 
 
   #[test]
