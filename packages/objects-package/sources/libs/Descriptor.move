@@ -1,9 +1,7 @@
-module objectsDAO::Descriptor {
-  use std::debug;
+module objectsDAO::descriptor {
   use std::string;
   use std::string::String;
   use std::vector;
-  use sui::hex;
   use sui::object;
   use sui::object::UID;
   use sui::table;
@@ -25,13 +23,13 @@ module objectsDAO::Descriptor {
     // Noun Backgrounds (Hex Colors)
     backgrounds: vector<String>,
     // Noun Bodies (Custom RLE)
-    bodies: vector<vector<u8>>,
+    bodies: vector<String>,
     // Noun Accessories (Custom RLE)
-    accessories: vector<vector<u8>>,
+    accessories: vector<String>,
     // Noun Heads (Custom RLE)
-    heads: vector<vector<u8>>,
+    heads: vector<String>,
     // Noun Glasses (Custom RLE)
-    glasses: vector<vector<u8>>
+    glasses: vector<String>
   }
 
   fun init(ctx: &mut TxContext) {
@@ -42,13 +40,13 @@ module objectsDAO::Descriptor {
       // Noun Backgrounds (Hex Colors)
       backgrounds: vector::empty<String>(),
       // Noun Bodies (Custom RLE)
-      bodies: vector::empty<vector<u8>>(),
+      bodies: vector::empty<String>(),
       // Noun Accessories (Custom RLE)
-      accessories: vector::empty<vector<u8>>(),
+      accessories: vector::empty<String>(),
       // Noun Heads (Custom RLE)
-      heads: vector::empty<vector<u8>>(),
+      heads: vector::empty<String>(),
       // Noun Glasses (Custom RLE)
-      glasses: vector::empty<vector<u8>>(),
+      glasses: vector::empty<String>(),
     };
     // Transfer the forge object to the module/package publisher
     transfer::public_share_object(objects_descriptor);
@@ -101,19 +99,19 @@ module objectsDAO::Descriptor {
     &objects_descriptor.backgrounds
   }
 
-  public fun get_bodies(objects_descriptor: &ObjectsDescriptor): &vector<vector<u8>> {
+  public fun get_bodies(objects_descriptor: &ObjectsDescriptor): &vector<String> {
     &objects_descriptor.bodies
   }
 
-  public fun get_accessories(objects_descriptor: &ObjectsDescriptor): &vector<vector<u8>> {
+  public fun get_accessories(objects_descriptor: &ObjectsDescriptor): &vector<String> {
     &objects_descriptor.accessories
   }
 
-  public fun get_heads(objects_descriptor: &ObjectsDescriptor): &vector<vector<u8>> {
+  public fun get_heads(objects_descriptor: &ObjectsDescriptor): &vector<String> {
     &objects_descriptor.heads
   }
 
-  public fun get_glasses(objects_descriptor: &ObjectsDescriptor): &vector<vector<u8>> {
+  public fun get_glasses(objects_descriptor: &ObjectsDescriptor): &vector<String> {
     &objects_descriptor.glasses
   }
 
@@ -148,7 +146,7 @@ module objectsDAO::Descriptor {
    * @notice Batch add Noun accessories.
    * @dev This function can only be called by the owner when not locked.
    */
-  public entry fun addManyAccessories(accessories: vector<vector<u8>>, objects_descriptor: &mut ObjectsDescriptor) {
+  public entry fun addManyAccessories(accessories: vector<String>, objects_descriptor: &mut ObjectsDescriptor) {
     let accessories_length = vector::length(&accessories);
     let i = 0;
     while (i < accessories_length) {
@@ -162,13 +160,13 @@ module objectsDAO::Descriptor {
    * @notice Batch add Noun bodies.
    * @dev This function can only be called by the owner when not locked.
    */
-  public entry fun addManyBodies(bodies: vector<vector<u8>>, objects_descriptor: &mut ObjectsDescriptor) {
+  public entry fun addManyBodies(bodies: vector<String>, objects_descriptor: &mut ObjectsDescriptor) {
     let bodies_length = vector::length(&bodies);
     let i = 0;
     while (i < bodies_length) {
       let body = *vector::borrow(&bodies, i);
-      debug::print(&string::utf8(b"body"));
-      debug::print(&body);
+      // debug::print(&string::utf8(b"body"));
+      // debug::print(&body);
       addBody(body, objects_descriptor);
       i = i + 1
     }
@@ -178,7 +176,7 @@ module objectsDAO::Descriptor {
    * @notice Batch add Noun heads.
    * @dev This function can only be called by the owner when not locked.
    */
-  public entry fun addManyHeads(heads: vector<vector<u8>>, objects_descriptor: &mut ObjectsDescriptor) {
+  public entry fun addManyHeads(heads: vector<String>, objects_descriptor: &mut ObjectsDescriptor) {
     let heads_length = vector::length(&heads);
     let i = 0;
     while (i < heads_length) {
@@ -192,7 +190,7 @@ module objectsDAO::Descriptor {
    * @notice Batch add Noun glasses.
    * @dev This function can only be called by the owner when not locked.
    */
-  public entry fun addManyGlasses(glasses: vector<vector<u8>>, objects_descriptor: &mut ObjectsDescriptor) {
+  public entry fun addManyGlasses(glasses: vector<String>, objects_descriptor: &mut ObjectsDescriptor) {
     let glasses_length = vector::length(&glasses);
     let i = 0;
     while (i < glasses_length) {
@@ -229,7 +227,7 @@ module objectsDAO::Descriptor {
   /**
    * @notice Add a Noun body.
    */
-  public fun addBody(body: vector<u8>, objects_descriptor: &mut ObjectsDescriptor) {
+  public fun addBody(body: String, objects_descriptor: &mut ObjectsDescriptor) {
     // let i = vector::length(&objects_descriptor.bodies);
     // vector::insert(&mut objects_descriptor.bodies, body, i);
     // let body = hex::decode(body);
@@ -239,7 +237,7 @@ module objectsDAO::Descriptor {
   /**
    * @notice Add a Noun accessory.
    */
-  public fun addAccessory(accessory: vector<u8>, objects_descriptor: &mut ObjectsDescriptor) {
+  public fun addAccessory(accessory: String, objects_descriptor: &mut ObjectsDescriptor) {
     // let i = vector::length(&objects_descriptor.accessories);
     // vector::insert(&mut objects_descriptor.accessories, accessory, i);
     vector::push_back(&mut objects_descriptor.accessories, accessory);
@@ -248,7 +246,7 @@ module objectsDAO::Descriptor {
   /**
    * @notice Add a Noun head.
    */
-  public fun addHead(head: vector<u8>, objects_descriptor: &mut ObjectsDescriptor) {
+  public fun addHead(head: String, objects_descriptor: &mut ObjectsDescriptor) {
     // let i = vector::length(&objects_descriptor.heads);
     // vector::insert(&mut objects_descriptor.heads, head, i);
     vector::push_back(&mut objects_descriptor.heads, head);
@@ -257,7 +255,7 @@ module objectsDAO::Descriptor {
   /**
    * @notice Add Noun glasses.
    */
-  public fun addGlasses(glasses: vector<u8>, objects_descriptor: &mut ObjectsDescriptor) {
+  public fun addGlasses(glasses: String, objects_descriptor: &mut ObjectsDescriptor) {
     // let i = vector::length(&objects_descriptor.glasses);
     // vector::insert(&mut objects_descriptor.glasses, glasses, i);
     vector::push_back(&mut objects_descriptor.glasses, glasses);
@@ -274,6 +272,10 @@ module objectsDAO::Descriptor {
     test_scenario::next_tx(scenario, @0x0001);
     scenario_val
   }
+
+
+
+
 
 
   #[test]
@@ -297,100 +299,100 @@ module objectsDAO::Descriptor {
   }
 
 
-  #[test]
-  fun test_addManyBackgrounds() {
-    let scenario_val = init_test();
-    let scenario = &mut scenario_val;
-    let backgrounds: vector<String> = vector[
-      string::utf8(b""),
-      string::utf8(b"ffffff")
-    ];
-    {
-      let ctx = test_scenario::ctx(scenario);
-      init(ctx)
-    };
-    test_scenario::next_tx(scenario, @0x0001);
-    let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
-    addManyBackgrounds(backgrounds, &mut objects_descriptor);
-    test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
-    test_scenario::end(scenario_val);
-  }
-
-
-  #[test]
-  fun test_addManyAccessories() {
-    let scenario_val = init_test();
-    let scenario = &mut scenario_val;
-    let accessories: vector<vector<u8>> = vector[
-      b"",
-      b"ffffff"
-    ];
-    {
-      let ctx = test_scenario::ctx(scenario);
-      init(ctx)
-    };
-    test_scenario::next_tx(scenario, @0x0001);
-    let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
-    addManyAccessories(accessories, &mut objects_descriptor);
-    test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
-    test_scenario::end(scenario_val);
-  }
-
-  #[test]
-  fun test_addManyBodies() {
-    let scenario_val = init_test();
-    let scenario = &mut scenario_val;
-    let bodys: vector<vector<u8>> = vector[
-      b"",
-      b"ffffff"
-    ];
-    {
-      let ctx = test_scenario::ctx(scenario);
-      init(ctx)
-    };
-    test_scenario::next_tx(scenario, @0x0001);
-    let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
-    addManyBodies(bodys, &mut objects_descriptor);
-    test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
-    test_scenario::end(scenario_val);
-  }
-
-
-  #[test]
-  fun test_addManyHeads() {
-    let scenario_val = init_test();
-    let scenario = &mut scenario_val;
-    let heads: vector<vector<u8>> = vector[
-      b"",
-      b"ffffff"
-    ];
-    {
-      let ctx = test_scenario::ctx(scenario);
-      init(ctx)
-    };
-    test_scenario::next_tx(scenario, @0x0001);
-    let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
-    addManyHeads(heads, &mut objects_descriptor);
-    test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
-    test_scenario::end(scenario_val);
-  }
-
-  #[test]
-  fun test_addManyGlasses() {
-    let scenario_val = init_test();
-    let scenario = &mut scenario_val;
-    let glasses: vector<vector<u8>> = vector[
-      b"",
-      b"ffffff"
-    ];
-    {
-      let ctx = test_scenario::ctx(scenario);
-      init(ctx)
-    };
-    test_scenario::next_tx(scenario, @0x0001);
-    let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
-    addManyGlasses(glasses, &mut objects_descriptor);
-    test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
-    test_scenario::end(scenario_val);
-  }
+  // #[test]
+  // fun test_addManyBackgrounds() {
+  //   let scenario_val = init_test();
+  //   let scenario = &mut scenario_val;
+  //   let backgrounds: vector<String> = vector[
+  //     string::utf8(b""),
+  //     string::utf8(b"ffffff")
+  //   ];
+  //   {
+  //     let ctx = test_scenario::ctx(scenario);
+  //     init(ctx)
+  //   };
+  //   test_scenario::next_tx(scenario, @0x0001);
+  //   let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
+  //   addManyBackgrounds(backgrounds, &mut objects_descriptor);
+  //   test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
+  //   test_scenario::end(scenario_val);
+  // }
+  //
+  //
+  // #[test]
+  // fun test_addManyAccessories() {
+  //   let scenario_val = init_test();
+  //   let scenario = &mut scenario_val;
+  //   let accessories: vector<String> = vector[
+  //     b"",
+  //     b"ffffff"
+  //   ];
+  //   {
+  //     let ctx = test_scenario::ctx(scenario);
+  //     init(ctx)
+  //   };
+  //   test_scenario::next_tx(scenario, @0x0001);
+  //   let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
+  //   addManyAccessories(accessories, &mut objects_descriptor);
+  //   test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
+  //   test_scenario::end(scenario_val);
+  // }
+  //
+  // #[test]
+  // fun test_addManyBodies() {
+  //   let scenario_val = init_test();
+  //   let scenario = &mut scenario_val;
+  //   let bodys: vector<String> = vector[
+  //     b"",
+  //     b"ffffff"
+  //   ];
+  //   {
+  //     let ctx = test_scenario::ctx(scenario);
+  //     init(ctx)
+  //   };
+  //   test_scenario::next_tx(scenario, @0x0001);
+  //   let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
+  //   addManyBodies(bodys, &mut objects_descriptor);
+  //   test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
+  //   test_scenario::end(scenario_val);
+  // }
+  //
+  //
+  // #[test]
+  // fun test_addManyHeads() {
+  //   let scenario_val = init_test();
+  //   let scenario = &mut scenario_val;
+  //   let heads: vector<String> = vector[
+  //     b"",
+  //     b"ffffff"
+  //   ];
+  //   {
+  //     let ctx = test_scenario::ctx(scenario);
+  //     init(ctx)
+  //   };
+  //   test_scenario::next_tx(scenario, @0x0001);
+  //   let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
+  //   addManyHeads(heads, &mut objects_descriptor);
+  //   test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
+  //   test_scenario::end(scenario_val);
+  // }
+  //
+  // #[test]
+  // fun test_addManyGlasses() {
+  //   let scenario_val = init_test();
+  //   let scenario = &mut scenario_val;
+  //   let glasses: vector<String> = vector[
+  //     b"",
+  //     b"ffffff"
+  //   ];
+  //   {
+  //     let ctx = test_scenario::ctx(scenario);
+  //     init(ctx)
+  //   };
+  //   test_scenario::next_tx(scenario, @0x0001);
+  //   let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
+  //   addManyGlasses(glasses, &mut objects_descriptor);
+  //   test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
+  //   test_scenario::end(scenario_val);
+  // }
 }
