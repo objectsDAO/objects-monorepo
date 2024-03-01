@@ -18,7 +18,7 @@ export const AuctionActivity = () => {
 
     const txb = new TransactionBlock();
     // 5sui
-    // txb.setGasBudget(2000000000)
+    txb.setGasBudget(2000000000)
 
     const descriptor = txb.pure('0xb9eed160832edf5ec64b1d2fb0fb035bb9d580f77bf28dd0926a59149bc02bb8')
 
