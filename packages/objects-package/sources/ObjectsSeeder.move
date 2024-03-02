@@ -1,5 +1,4 @@
 module objectsDAO::objects_seeder {
-  use std::debug;
   use std::string;
   use std::string::String;
   use std::vector;
@@ -15,7 +14,6 @@ module objectsDAO::objects_seeder {
   use sui::object::UID;
   use sui::package;
   use sui::transfer;
-  use sui::tx_context;
   use sui::tx_context::{TxContext, sender};
   use sui::url;
   use sui::url::Url;
@@ -28,13 +26,12 @@ module objectsDAO::objects_seeder {
   use objectsDAO::descriptor::{init_test, addColorsToPalette, addManyBackgrounds, addManyAccessories, addManyGlasses,
     addManyHeads, addManyBodies
   };
-
-
   #[test_only]
   use sui::test_scenario;
+  #[test_only]
+  use std::debug;
 
-
-  struct Seed has copy, drop {
+  struct Seed has store,copy, drop {
     background: u64,
     body: u64,
     accessory: u64,
@@ -103,7 +100,7 @@ module objectsDAO::objects_seeder {
   }
 
 
-  public entry fun mint(object_id: u256, clock: &Clock, objects_descriptor: &mut ObjectsDescriptor,ctx: &mut TxContext) {
+  public entry fun mint(to:address,object_id: u256, clock: &Clock, objects_descriptor: &mut ObjectsDescriptor,ctx: &mut TxContext) {
     let seed = generateSeed(object_id, clock, objects_descriptor);
     let generate_svg_image = generateSVGImage(seed, objects_descriptor);
 
@@ -116,8 +113,8 @@ module objectsDAO::objects_seeder {
       image_url:url::new_unsafe(url_ascii)
     };
 
-    let sender = tx_context::sender(ctx);
-    transfer::public_transfer(nft, sender);
+    // let sender = tx_context::sender(ctx);
+    transfer::public_transfer(nft, to);
 
     event::emit(SVG {
       svg:generate_svg_image
@@ -128,7 +125,7 @@ module objectsDAO::objects_seeder {
   }
 
 
-  fun generateSeed(object_id: u256, clock: &Clock, objects_descriptor: &mut ObjectsDescriptor): Seed {
+  public fun generateSeed(object_id: u256, clock: &Clock, objects_descriptor: &mut ObjectsDescriptor): Seed {
     let randomness = (clock::timestamp_ms(clock) as u256) + object_id;
 
     event::emit(Random {
@@ -164,7 +161,7 @@ module objectsDAO::objects_seeder {
     }
   }
 
-  fun generateSVGImage(seed: Seed, objects_descriptor: &mut ObjectsDescriptor): String {
+  public fun generateSVGImage(seed: Seed, objects_descriptor: &mut ObjectsDescriptor): String {
     let parts = getPartsForSeed_(seed, objects_descriptor);
     // debug::print(&string::utf8(b"parts"));
     // debug::print(&string::utf8(b"parts"));
@@ -1669,14 +1666,14 @@ module objectsDAO::objects_seeder {
     debug::print(&string::utf8(b"seed"));
     debug::print(&seed);
 
-    let _svg = generateSVGImage(seed, &mut objects_descriptor);
+    let svg = generateSVGImage(seed, &mut objects_descriptor);
 
 
     // let rules = string::utf8(b"data:image/svg+xml;base64,");
     // string::insert(&mut svg,0,rules);
 
-    // debug::print(&string::utf8(b"svg"));
-    // debug::print(&svg);
+    debug::print(&string::utf8(b"svg"));
+    debug::print(&svg);
 
     clock::destroy_for_testing(clock);
     test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);

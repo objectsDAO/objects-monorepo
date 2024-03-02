@@ -1,5 +1,4 @@
 module objectsDAO::descriptor {
-  use std::string;
   use std::string::String;
   use std::vector;
   use sui::object;
@@ -13,8 +12,8 @@ module objectsDAO::descriptor {
   use sui::test_scenario;
   #[test_only]
   use sui::test_scenario::Scenario;
-
-
+  #[test_only]
+  use std::string;
 
   struct ObjectsDescriptor has key, store {
     id: UID,
