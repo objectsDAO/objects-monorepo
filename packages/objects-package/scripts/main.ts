@@ -17,7 +17,7 @@ const main =  async () =>{
   )
   const txb = new TransactionBlock();
   // 1sui
-  txb.setGasBudget(100000000)
+  txb.setGasBudget(1000000000)
   const publishTxn = await txb.publish({
     modules: modules,
     dependencies: dependencies

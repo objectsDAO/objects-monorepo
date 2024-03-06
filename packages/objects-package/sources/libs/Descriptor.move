@@ -24,11 +24,11 @@ module objectsDAO::descriptor {
     // Noun Bodies (Custom RLE)
     bodies: vector<String>,
     // Noun Accessories (Custom RLE)
-    accessories: vector<String>,
+    mouths: vector<String>,
     // Noun Heads (Custom RLE)
-    heads: vector<String>,
+    decoration: vector<String>,
     // Noun Glasses (Custom RLE)
-    glasses: vector<String>
+    masks: vector<String>
   }
 
   fun init(ctx: &mut TxContext) {
@@ -41,11 +41,11 @@ module objectsDAO::descriptor {
       // Noun Bodies (Custom RLE)
       bodies: vector::empty<String>(),
       // Noun Accessories (Custom RLE)
-      accessories: vector::empty<String>(),
+      mouths: vector::empty<String>(),
       // Noun Heads (Custom RLE)
-      heads: vector::empty<String>(),
+      decoration: vector::empty<String>(),
       // Noun Glasses (Custom RLE)
-      glasses: vector::empty<String>(),
+      masks: vector::empty<String>(),
     };
     // Transfer the forge object to the module/package publisher
     transfer::public_share_object(objects_descriptor);
@@ -66,24 +66,24 @@ module objectsDAO::descriptor {
   }
 
   /**
-   * @notice Get the number of available Noun `accessories`.
+   * @notice Get the number of available Noun `mouths`.
    */
-  public fun accessoryCount(objects_descriptor: &mut ObjectsDescriptor): u256 {
-    (vector::length(&objects_descriptor.accessories) as u256)
+  public fun mouthsCount(objects_descriptor: &mut ObjectsDescriptor): u256 {
+    (vector::length(&objects_descriptor.mouths) as u256)
   }
 
   /**
-   * @notice Get the number of available Noun `heads`.
+   * @notice Get the number of available Noun `decoration`.
    */
-  public fun headCount(objects_descriptor: &mut ObjectsDescriptor): u256 {
-    (vector::length(&objects_descriptor.heads) as u256)
+  public fun decorationsCount(objects_descriptor: &mut ObjectsDescriptor): u256 {
+    (vector::length(&objects_descriptor.decoration) as u256)
   }
 
   /**
-   * @notice Get the number of available Noun `glasses`.
+   * @notice Get the number of available Noun `masks`.
    */
-  public fun glassesCount(objects_descriptor: &ObjectsDescriptor): u256 {
-    (vector::length(&objects_descriptor.glasses) as u256)
+  public fun masksCount(objects_descriptor: &ObjectsDescriptor): u256 {
+    (vector::length(&objects_descriptor.masks) as u256)
   }
 
   public fun get_palettes(objects_descriptor: &ObjectsDescriptor): &Table<u8, vector<String>> {
@@ -102,16 +102,16 @@ module objectsDAO::descriptor {
     &objects_descriptor.bodies
   }
 
-  public fun get_accessories(objects_descriptor: &ObjectsDescriptor): &vector<String> {
-    &objects_descriptor.accessories
+  public fun get_mouths(objects_descriptor: &ObjectsDescriptor): &vector<String> {
+    &objects_descriptor.mouths
   }
 
-  public fun get_heads(objects_descriptor: &ObjectsDescriptor): &vector<String> {
-    &objects_descriptor.heads
+  public fun get_decoration(objects_descriptor: &ObjectsDescriptor): &vector<String> {
+    &objects_descriptor.decoration
   }
 
-  public fun get_glasses(objects_descriptor: &ObjectsDescriptor): &vector<String> {
-    &objects_descriptor.glasses
+  public fun get_masks(objects_descriptor: &ObjectsDescriptor): &vector<String> {
+    &objects_descriptor.masks
   }
 
   public entry fun addColorsToPalette(
@@ -122,7 +122,7 @@ module objectsDAO::descriptor {
     let palettes_length = table::length<u8, vector<String>>(&objects_descriptor.palettes);
     let newColors_length = vector::length(&newColors);
     let length = palettes_length + newColors_length;
-    assert!(length <= 256u64, 1);
+    // assert!(length <= 1000u64, 1);
     let i = 0;
     while (i < newColors_length) {
       let new_color = *vector::borrow(&newColors, i);
@@ -141,19 +141,7 @@ module objectsDAO::descriptor {
       i = i + 1
     }
   }
-  /**
-   * @notice Batch add Noun accessories.
-   * @dev This function can only be called by the owner when not locked.
-   */
-  public entry fun addManyAccessories(accessories: vector<String>, objects_descriptor: &mut ObjectsDescriptor) {
-    let accessories_length = vector::length(&accessories);
-    let i = 0;
-    while (i < accessories_length) {
-      let access = *vector::borrow(&accessories, i);
-      addAccessory(access, objects_descriptor);
-      i = i + 1
-    }
-  }
+
 
   /**
    * @notice Batch add Noun bodies.
@@ -172,29 +160,43 @@ module objectsDAO::descriptor {
   }
 
   /**
-   * @notice Batch add Noun heads.
-   * @dev This function can only be called by the owner when not locked.
-   */
-  public entry fun addManyHeads(heads: vector<String>, objects_descriptor: &mut ObjectsDescriptor) {
-    let heads_length = vector::length(&heads);
+  * @notice Batch add Noun mouths.
+  * @dev This function can only be called by the owner when not locked.
+  */
+  public entry fun addManyMouths(mouths: vector<String>, objects_descriptor: &mut ObjectsDescriptor) {
+    let mouths_length = vector::length(&mouths);
     let i = 0;
-    while (i < heads_length) {
-      let head = *vector::borrow(&heads, i);
-      addHead(head, objects_descriptor);
+    while (i < mouths_length) {
+      let mouths = *vector::borrow(&mouths, i);
+      addMouth(mouths, objects_descriptor);
       i = i + 1
     }
   }
 
   /**
-   * @notice Batch add Noun glasses.
+   * @notice Batch add Noun decoration.
    * @dev This function can only be called by the owner when not locked.
    */
-  public entry fun addManyGlasses(glasses: vector<String>, objects_descriptor: &mut ObjectsDescriptor) {
-    let glasses_length = vector::length(&glasses);
+  public entry fun addManyDecorations(decoration: vector<String>, objects_descriptor: &mut ObjectsDescriptor) {
+    let decoration_length = vector::length(&decoration);
     let i = 0;
-    while (i < glasses_length) {
-      let glass = *vector::borrow(&glasses, i);
-      addGlasses(glass, objects_descriptor);
+    while (i < decoration_length) {
+      let decoration = *vector::borrow(&decoration, i);
+      addDecoration(decoration, objects_descriptor);
+      i = i + 1
+    }
+  }
+
+  /**
+   * @notice Batch add Noun masks.
+   * @dev This function can only be called by the owner when not locked.
+   */
+  public entry fun addManyMasks(masks: vector<String>, objects_descriptor: &mut ObjectsDescriptor) {
+    let masks_length = vector::length(&masks);
+    let i = 0;
+    while (i < masks_length) {
+      let masks = *vector::borrow(&masks, i);
+      addMasks(masks, objects_descriptor);
       i = i + 1
     }
   }
@@ -217,9 +219,6 @@ module objectsDAO::descriptor {
    * @notice Add a Noun background.
    */
   public fun addBackground(background: String, objects_descriptor: &mut ObjectsDescriptor) {
-    // let i = vector::length(&objects_descriptor.backgrounds);
-    // vector::insert(&mut objects_descriptor.backgrounds, background, i);
-
     vector::push_back(&mut objects_descriptor.backgrounds, background);
   }
 
@@ -227,37 +226,28 @@ module objectsDAO::descriptor {
    * @notice Add a Noun body.
    */
   public fun addBody(body: String, objects_descriptor: &mut ObjectsDescriptor) {
-    // let i = vector::length(&objects_descriptor.bodies);
-    // vector::insert(&mut objects_descriptor.bodies, body, i);
-    // let body = hex::decode(body);
     vector::push_back(&mut objects_descriptor.bodies, body);
   }
 
   /**
-   * @notice Add a Noun accessory.
+   * @notice Add a Noun mouth.
    */
-  public fun addAccessory(accessory: String, objects_descriptor: &mut ObjectsDescriptor) {
-    // let i = vector::length(&objects_descriptor.accessories);
-    // vector::insert(&mut objects_descriptor.accessories, accessory, i);
-    vector::push_back(&mut objects_descriptor.accessories, accessory);
+  public fun addMouth(mouth: String, objects_descriptor: &mut ObjectsDescriptor) {
+    vector::push_back(&mut objects_descriptor.mouths, mouth);
   }
 
   /**
    * @notice Add a Noun head.
    */
-  public fun addHead(head: String, objects_descriptor: &mut ObjectsDescriptor) {
-    // let i = vector::length(&objects_descriptor.heads);
-    // vector::insert(&mut objects_descriptor.heads, head, i);
-    vector::push_back(&mut objects_descriptor.heads, head);
+  public fun addDecoration(decoration: String, objects_descriptor: &mut ObjectsDescriptor) {
+    vector::push_back(&mut objects_descriptor.decoration, decoration);
   }
 
   /**
-   * @notice Add Noun glasses.
+   * @notice Add Noun masks.
    */
-  public fun addGlasses(glasses: String, objects_descriptor: &mut ObjectsDescriptor) {
-    // let i = vector::length(&objects_descriptor.glasses);
-    // vector::insert(&mut objects_descriptor.glasses, glasses, i);
-    vector::push_back(&mut objects_descriptor.glasses, glasses);
+  public fun addMasks(masks: String, objects_descriptor: &mut ObjectsDescriptor) {
+    vector::push_back(&mut objects_descriptor.masks, masks);
   }
 
   #[test_only]
@@ -322,7 +312,7 @@ module objectsDAO::descriptor {
   // fun test_addManyAccessories() {
   //   let scenario_val = init_test();
   //   let scenario = &mut scenario_val;
-  //   let accessories: vector<String> = vector[
+  //   let mouths: vector<String> = vector[
   //     b"",
   //     b"ffffff"
   //   ];
@@ -332,7 +322,7 @@ module objectsDAO::descriptor {
   //   };
   //   test_scenario::next_tx(scenario, @0x0001);
   //   let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
-  //   addManyAccessories(accessories, &mut objects_descriptor);
+  //   addManyAccessories(mouths, &mut objects_descriptor);
   //   test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
   //   test_scenario::end(scenario_val);
   // }
@@ -361,7 +351,7 @@ module objectsDAO::descriptor {
   // fun test_addManyHeads() {
   //   let scenario_val = init_test();
   //   let scenario = &mut scenario_val;
-  //   let heads: vector<String> = vector[
+  //   let decoration: vector<String> = vector[
   //     b"",
   //     b"ffffff"
   //   ];
@@ -371,7 +361,7 @@ module objectsDAO::descriptor {
   //   };
   //   test_scenario::next_tx(scenario, @0x0001);
   //   let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
-  //   addManyHeads(heads, &mut objects_descriptor);
+  //   addManyHeads(decoration, &mut objects_descriptor);
   //   test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
   //   test_scenario::end(scenario_val);
   // }
@@ -380,7 +370,7 @@ module objectsDAO::descriptor {
   // fun test_addManyGlasses() {
   //   let scenario_val = init_test();
   //   let scenario = &mut scenario_val;
-  //   let glasses: vector<String> = vector[
+  //   let masks: vector<String> = vector[
   //     b"",
   //     b"ffffff"
   //   ];
@@ -390,7 +380,7 @@ module objectsDAO::descriptor {
   //   };
   //   test_scenario::next_tx(scenario, @0x0001);
   //   let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
-  //   addManyGlasses(glasses, &mut objects_descriptor);
+  //   addManyGlasses(masks, &mut objects_descriptor);
   //   test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
   //   test_scenario::end(scenario_val);
   // }

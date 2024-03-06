@@ -10,7 +10,7 @@ const encode = async () => {
 
   console.log(encoder)
 
-  const partfolders = ['1-bodies', '2-accessories', '3-heads', '4-glasses'];
+  const partfolders = ['1-bodies', '2-mouths', '3-decoration', '4-masks'];
   for (const folder of partfolders) {
     const folderpath = path.join(__dirname, './images/v0', folder);
     const files = await fs.readdir(folderpath);

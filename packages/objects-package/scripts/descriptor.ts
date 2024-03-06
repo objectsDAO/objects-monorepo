@@ -9,12 +9,12 @@ import {chunkArray} from "./utils";
 
 const main =  async () =>{
 
-  const {bodies, accessories, heads, glasses} = images;
+  const {bodies, mouths, decoration, masks} = images;
 
-  // console.log(chunkArray(accessories, 10).map(chunk =>
+  // console.log(chunkArray(mouths, 10).map(chunk =>
   //   chunk.map(({ data }) => data),
   // ))
-  const package_address = '0x60c5c57650f9ed5006a26c3c832455f1d7a3aef80b62a74c8f4b0a5f50b18b3b'
+  const package_address = '0xe3b146d91c993afd7e22b3541fd41b5b479f4f2c2b2fd695dd05484f7079fb86'
 
   const suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
   const keypair = Ed25519Keypair.fromSecretKey(Buffer.from("0bc2bd8d2135c9c0ea18d56cb0b021788e79c7fdf3435c455a049ee92c532a57", 'hex'))
@@ -23,7 +23,7 @@ const main =  async () =>{
   txb.setGasBudget(1000000000)
 
 
-  const descriptor = txb.pure('0xb9eed160832edf5ec64b1d2fb0fb035bb9d580f77bf28dd0926a59149bc02bb8')
+  const descriptor = txb.pure('0x3ceee5cf8635f2ada99fccb300b952a01ffcfb34a033f82b429c0cd16503686b')
 
 
   txb.moveCall(
@@ -48,30 +48,44 @@ const main =  async () =>{
   )
 
 
-  chunkArray(accessories, 10).map(chunk =>
-    txb.moveCall(
-      {
-        target:`${package_address}::descriptor::addManyAccessories`,
-        arguments: [txb.pure(chunk.map(({ data }) => data)),descriptor],
-      }
-    ),
+  txb.moveCall(
+    {
+      target:`${package_address}::descriptor::addManyMouths`,
+      arguments: [txb.pure(mouths.map(({ data }) => data)),descriptor],
+    }
   )
 
+  // chunkArray(mouths, 10).map(chunk =>
+  //   txb.moveCall(
+  //     {
+  //       target:`${package_address}::descriptor::addManyAccessories`,
+  //       arguments: [txb.pure(chunk.map(({ data }) => data)),descriptor],
+  //     }
+  //   ),
+  // )
 
-
-  chunkArray(heads, 10).map(chunk =>
-    txb.moveCall(
-      {
-        target:`${package_address}::descriptor::addManyHeads`,
-        arguments: [txb.pure(chunk.map(({ data }) => data)),descriptor],
-      }
-    )
-  )
 
   txb.moveCall(
     {
-      target:`${package_address}::descriptor::addManyGlasses`,
-      arguments: [txb.pure(glasses.map(({ data }) => data)),descriptor],
+      target:`${package_address}::descriptor::addManyDecorations`,
+      arguments: [txb.pure(decoration.map(({ data }) => data)),descriptor],
+    }
+  )
+
+
+  // chunkArray(decoration, 10).map(chunk =>
+  //   txb.moveCall(
+  //     {
+  //       target:`${package_address}::descriptor::addManyHeads`,
+  //       arguments: [txb.pure(chunk.map(({ data }) => data)),descriptor],
+  //     }
+  //   )
+  // )
+
+  txb.moveCall(
+    {
+      target:`${package_address}::descriptor::addManyMasks`,
+      arguments: [txb.pure(masks.map(({ data }) => data)),descriptor],
     }
   )
 
