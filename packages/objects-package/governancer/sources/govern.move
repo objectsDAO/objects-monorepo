@@ -10,7 +10,8 @@ module governancer::govern {
     // TODO: nfts have diff weight.
     // TODO: action: transfer object to sender.
     // TODO: batch transfer object.
-    const ETimeout: u64 = 0;
+    const ETimeout: u64 = 10;
+    const ETimenotReached: u64 = 11;
     
     struct Proposal has key, store {
         id: UID,
@@ -19,7 +20,9 @@ module governancer::govern {
         start_timestamp: u64,
         end_timestamp: u64,
         approve_num: u64,
-        deny_num: u64
+        deny_num: u64,
+        excuted_hash: string::String
+
     }
 
     struct Vote has key, store {
@@ -91,8 +94,30 @@ module governancer::govern {
             start_timestamp: start_timestamp,
             end_timestamp: end_timestamp,
             approve_num: 0,
-            deny_num: 0
+            deny_num: 0,
+            excuted_hash: string::utf8(b"")
+
         };
         transfer::share_object(proposal)
     }
+
+
+    // /// Read extra gene sequence of a Capy as `vector<u8>`.
+    // public fun dev_genes(self: &Capy): &vector<u8> {
+    //     &self.dev_genes.sequence
+    // }
+    // to call by other modules, could write a example about that.
+    public entry fun get_result(proposal: &mut Proposal, ctx: &mut TxContext): bool {
+        let time_now: u64 = tx_context::epoch_timestamp_ms(ctx);
+        assert!(time_now > proposal.end_timestamp, ETimenotReached);
+        if(proposal.approve_num > proposal.deny_num) {
+            true
+        } else {
+            false
+        }
+    }
+
+    public entry fun excuted_confirm(proposal: &mut Proposal, tx_id: string::String) {
+        proposal.excuted_hash = tx_id;
+    }   
 }
