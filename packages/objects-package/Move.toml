@@ -1,8 +1,13 @@
 [package]
 name = "objectsDAO"
+version = "1.0.0"
+authors = []
 
-[dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "testnet-v1.17.3" }
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
+
 
 [addresses]
 objectsDAO = "0x0"
