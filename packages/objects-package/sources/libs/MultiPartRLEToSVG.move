@@ -1,8 +1,7 @@
 module objectsDAO::multi_part_rel_to_svg {
     use std::string;
     use std::ascii;
-  use std::debug;
-  use std::string::{String};
+    use std::string::{String};
     use std::vector;
     use objectsDAO::base64;
     use objectsDAO::descriptor::{ObjectsDescriptor, get_mut_palettes};
