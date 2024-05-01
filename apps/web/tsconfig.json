@@ -1,11 +1,25 @@
 {
   "extends": "@repo/typescript-config/nextjs.json",
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS",
+    },
+  },
   "compilerOptions": {
+    "jsx": "preserve",
     "plugins": [
       {
-        "name": "next"
-      }
-    ]
+        "name": "next",
+      },
+    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "skipLibCheck": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "moduleResolution": "Node16",
+    "module": "Node16",
   },
   "include": [
     "next-env.d.ts",
@@ -13,7 +27,7 @@
     "**/*.js",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
 }
