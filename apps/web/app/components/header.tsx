@@ -31,6 +31,8 @@ export const Header = () => {
   //     console.log("account publicKey: ", account?.publicKey);
   //   }, [connected]);
 
+  const wallet_address = useCurrentAccount()?.address;
+
   useEffect(() => {
     const query_treasury_balance = async () => {
       const metadata = await loadMetadata(NETWORK, PACKAGE_ID);
@@ -39,16 +41,16 @@ export const Header = () => {
         packageId: PACKAGE_ID,
         metadata: metadata,
       });
-      const balance = await obelisk.getBalance(TREASURE_ADDRESS);
-
+      // const balance = await obelisk.getBalance(TREASURE_ADDRESS);
+      const balance = await obelisk.balanceOf(TREASURE_ADDRESS);
       const objectBalance = await obelisk.balanceOf(
         TREASURE_ADDRESS,
         TREASURE_OBJECT_ADDRESS,
       );
       console.log(balance);
       console.log(objectBalance);
-      setTreasuryBalance(balance.toString());
-      setTreasuryObjectBalance(objectBalance.toString());
+      setTreasuryBalance(balance.totalBalance);
+      setTreasuryObjectBalance(objectBalance.totalBalance);
     };
     query_treasury_balance();
   }, [treasuryBalance]);
@@ -91,7 +93,8 @@ export const Header = () => {
           </Link>
         </div>
         <div className="ml-5">
-          <Link href={`/userinfo/${currentWallet.accounts}`}>
+          {/* <Link href={`/userinfo/${currentWallet?.accounts}`}> */}
+          <Link href={`/userinfo/${wallet_address}`}>
             <Button variant="outline" className="font-bold bg-zinc-300 ">
               Space
             </Button>

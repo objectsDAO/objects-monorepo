@@ -3,23 +3,23 @@ type NetworkType = "testnet" | "mainnet" | "devnet" | "localnet";
 const NETWORK: NetworkType = "devnet";
 
 const PACKAGE_ID =
-  "0x641af6b5821077afcd5656e577a3ea479dbca3ea78ce665f667a5cf3cf713072";
+  "0x6ccdba6d01e651bd78e362f38e531be20141e0c6135cbb1bde0cb6400cf1c67f";
 
 const TREASURE_OBJECT_ADDRESS =
-  "0xd8f6f1195aad9e39a3bd4bfe98a682bc6e6618b8640cf39c26f79a42863d6172::objectsCoin::OBJECT";
+  "0x6ccdba6d01e651bd78e362f38e531be20141e0c6135cbb1bde0cb6400cf1c67f::object::OBJECT";
 
 const TREASURE_ADDRESS =
-  "0xd8f6f1195aad9e39a3bd4bfe98a682bc6e6618b8640cf39c26f79a42863d6172";
+  "0x59a5fbf2c56da3a4a2ac761f062cb0e8ed6c6cb1812136178cf2321586736cc7";
 
 const OBJECT_ADDRESS =
   "0xbfefbf1ee21892c1938ab9ab3ade4222c9970e1defc7d3416dd37a40c35462e5";
 
 const ObjectsDescriptor =
-  "0x991daf515ca35c654b1d60e0d7c57f067334b85341b1aa3183fbf8d398887758";
+  "0x72df5befa1d9243007672716e3b57ee0745a90bc8ec304edc17a631018838b4d";
 const AuctionManager =
-  "0xfda124a3b6c0d16ecfb3fed804eb89514d8184d266e09abc864fbf22c35a78ce";
+  "0x65b4542069fe7ddbe1881f581e23a9104b0f0c2868ab820a7ea797397f789b96";
 const GovManager =
-  "0x6deb21391c6276620120f7bd3db5b899a968b54223d049cf8f20ed3e378b8c7c";
+  "0x98ace10a2b799e28f21a1c2eec0a9813655998d11d8c277b3c02c0ed383acfd6";
 
 export {
   NETWORK,

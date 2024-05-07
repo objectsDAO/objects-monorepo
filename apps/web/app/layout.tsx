@@ -13,7 +13,7 @@ import {
 import { getFullnodeUrl } from "@mysten/sui.js/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@repo/ui/components/ui/sonner";
-
+import { NETWORK } from "./chain/config";
 import { Footer } from "./components/footer";
 import { Header } from "./components/header";
 const inter = Inter({ subsets: ["latin"] });
@@ -41,7 +41,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <QueryClientProvider client={queryClient}>
-          <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
+          <SuiClientProvider networks={networkConfig} defaultNetwork={NETWORK}>
             <WalletProvider>
               <Header />
               <Toaster />

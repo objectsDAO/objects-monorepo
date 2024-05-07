@@ -2,7 +2,12 @@
 
 import { Button } from "@repo/ui/components/ui/button";
 import React, { useState, useEffect } from "react";
-import { NETWORK, OBJECT_ADDRESS, PACKAGE_ID } from "../../chain/config";
+import {
+  GovManager,
+  NETWORK,
+  OBJECT_ADDRESS,
+  PACKAGE_ID,
+} from "../../chain/config";
 import { Obelisk, loadMetadata, TransactionBlock } from "@0xobelisk/sui-client";
 import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
@@ -51,7 +56,7 @@ export default function Page({ params }: { params: { id: string } }) {
       });
 
       const tx = new TransactionBlock();
-      const proposalParams = [tx.pure(proposal_id)];
+      const proposalParams = [tx.pure(GovManager), tx.pure(proposal_id)];
       const proposal: any[] = await obelisk.query.gov.get_proposal(
         tx,
         proposalParams,
@@ -75,9 +80,17 @@ export default function Page({ params }: { params: { id: string } }) {
     const tx = new TransactionBlock();
     const voteParams = [
       tx.pure(OBJECT_ADDRESS),
+      tx.pure(GovManager),
+      tx.pure(0x6),
       tx.pure(params.id),
       tx.pure(voteChoise),
     ];
+
+    // _objects: &Objects,
+    // gov_manager:&mut GovManager,
+    // clock: &Clock,
+    // proposal_id: u64,
+    // decision: bool,
     await obelisk.tx.gov.vote(
       tx,
       voteParams, // params

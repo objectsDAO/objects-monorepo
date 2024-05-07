@@ -108,14 +108,14 @@ export default function Page({ params }: { params: { address: string } }) {
         try {
           const tx = new TransactionBlock();
           const nftParams = [tx.pure(current_object.object_address)];
-          const nft_svg: any[] = await obelisk.query.token.view_token_svg(
-            tx,
-            nftParams,
-          );
-          console.log(nft_svg);
-          nft_res.name = nft_svg[0].name;
-          nft_res.uri = nft_svg[0].uri;
-          nftLists.push(nft_res);
+          // const nft_svg: any[] = await obelisk.query.token.view_token_svg(
+          //   tx,
+          //   nftParams,
+          // );
+          // console.log(nft_svg);
+          // nft_res.name = nft_svg[0].name;
+          // nft_res.uri = nft_svg[0].uri;
+          // nftLists.push(nft_res);
         } catch (error) {
           // 处理异常情况，例如记录错误日志
           console.error("Error fetching NFT:", error);

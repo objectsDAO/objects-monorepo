@@ -1,7 +1,18 @@
 import { Button } from "@ui/components/ui/button";
 import { Input } from "@ui/components/ui/input";
-import { loadMetadata, Obelisk, TransactionBlock } from "@0xobelisk/sui-client";
-import { NETWORK, PACKAGE_ID } from "../chain/config";
+import {
+  loadMetadata,
+  Obelisk,
+  TransactionBlock,
+  DevInspectResults,
+  ObeliskObjectContent,
+} from "@0xobelisk/sui-client";
+import {
+  NETWORK,
+  PACKAGE_ID,
+  AuctionManager,
+  ObjectsDescriptor,
+} from "../chain/config";
 import {
   ConnectButton,
   useCurrentAccount,
@@ -13,6 +24,7 @@ import Image from "next/image";
 
 import { ScrollArea } from "@ui/components/ui/scroll-area";
 import { toast } from "sonner";
+import { convertBalanceToCurrency } from "../utils";
 
 type BidListType = {
   bid_address: string;
@@ -31,7 +43,7 @@ type AuctionType = {
 
 export const AuctionActivity = () => {
   const [price, setPrice] = useState(0);
-  const [bidding, setBidding] = useState();
+  const [bidding, setBidding] = useState(0);
   const [auction, setAuction] = useState<AuctionType>({
     amount: "",
     bid_list: [
@@ -52,9 +64,10 @@ export const AuctionActivity = () => {
     uri: "",
   });
 
-  const { mutate: signAndExecuteTransactionBlock } =
-    useSignAndExecuteTransactionBlock();
   const { currentWallet, connectionStatus } = useCurrentWallet();
+
+  const address = useCurrentAccount()?.address;
+  const signAndExecute = useSignAndExecuteTransactionBlock();
   // const { mutate: signAndExecuteTransactionBlock } = useSignAndExecuteTransactionBlock();
 
   useEffect(() => {
@@ -68,29 +81,54 @@ export const AuctionActivity = () => {
       });
 
       const auctionTx = new TransactionBlock();
-      const auctionParams = [];
-      const auctionData: any[] =
-        await obelisk.query.objects_auctio.get_last_auction(
-          auctionTx,
-          auctionParams,
-        );
-      console.log(auctionData);
-      let nft_res = {
-        name: "Object 0",
-        uri: "",
-      };
+      const auctionParams = [auctionTx.pure(AuctionManager)];
+      const auctionObject = await obelisk.getObject(AuctionManager);
 
-      const nftTx = new TransactionBlock();
-      const nftParams = [auctionData[0].object_address];
-      const nft_svg: any[] = await obelisk.query.token.view_token_svg(
-        nftTx,
-        nftParams,
-      );
-      console.log(nft_svg);
-      nft_res.name = nft_svg[0].name;
-      nft_res.uri = nft_svg[0].uri;
-      setNFTBase64(nft_res);
-      setAuction(auctionData[0]);
+      const itemObjectContent = auctionObject.content;
+      if (itemObjectContent != null) {
+        const objectContent = itemObjectContent as ObeliskObjectContent;
+        const objectFields = objectContent.fields as Record<string, any>;
+        // console.log("auctions data");
+        // console.log(objectFields);
+        const latestAuction =
+          objectFields.auctions[objectFields.auctions.length - 1];
+        // console.log(latestAuction);
+        // console.log(latestAuction.fields.object_address);
+        const objectAddress = latestAuction.fields.object_address;
+        const newObjectNft = await obelisk.getObject(objectAddress);
+        // console.log(newObjectNft);
+        // console.log(newObjectNft.display.data.image_url);
+        setNFTBase64({
+          name: `Object ${objectFields.auctions.length - 1}`,
+          uri: newObjectNft.display.data.image_url,
+        });
+        setAuction(latestAuction.fields);
+        setBidding(
+          Number(
+            convertBalanceToCurrency(
+              Number(latestAuction.fields.amount) + 10000000,
+            ),
+          ),
+        );
+      }
+      // const auctionData: DevInspectResults =
+      //   await obelisk.query.objects_auction.get_last_auction(
+      //     auctionTx,
+      //     auctionParams,
+      //   );
+      // const formatAuctionData = formatQueryResult(auctionData);
+
+      // const nftTx = new TransactionBlock();
+      // const nftParams = [auctionData[0].object_address];
+      // const nft_svg: any[] = await obelisk.query.token.view_token_svg(
+      //   nftTx,
+      //   nftParams,
+      // );
+      // console.log(nft_svg);
+      // nft_res.name = nft_svg[0].name;
+      // nft_res.uri = nft_svg[0].uri;
+      // setNFTBase64(nft_res);
+      // setAuction(auctionData[0]);
 
       // setBidding(
       // 	Number(
@@ -131,14 +169,16 @@ export const AuctionActivity = () => {
 
     const tx = new TransactionBlock();
     const bidding_amount = tx.pure(Number(bidding) * 100000000);
-    const params = [bidding_amount];
-    await obelisk.tx.objects_auctio.create_bid(
+    const bidding_coin = tx.splitCoins(tx.gas, [bidding_amount]);
+    const params = [bidding_coin, tx.pure("0x6"), tx.pure(AuctionManager)];
+    await obelisk.tx.objects_auction.create_bid(
       tx,
       params, // params
       undefined, // typeArguments
       true,
     );
-    signAndExecuteTransactionBlock(
+
+    signAndExecute.mutateAsync(
       {
         transactionBlock: tx,
       },
@@ -172,25 +212,37 @@ export const AuctionActivity = () => {
       metadata: metadata,
     });
     const tx = new TransactionBlock();
-    const params = [];
-    await obelisk.tx.objects_auctio.claim(
+    const params = [
+      tx.object("0x6"),
+      tx.object("0x8"),
+      tx.object(AuctionManager),
+      tx.object(ObjectsDescriptor),
+    ];
+    tx.setGasBudget(1000000000);
+    await obelisk.tx.objects_auction.claim(
       tx,
       params, // params
       undefined, // typeArguments
       true,
     );
 
-    signAndExecuteTransactionBlock(
+    signAndExecute.mutateAsync(
       {
         transactionBlock: tx,
+        chain: "sui:devnet",
       },
       {
+        onError: (res) => {
+          console.log(res);
+        },
         onSuccess: async (result) => {
           toast("Translation Successful", {
             description: new Date().toUTCString(),
             action: {
               label: "Check in Explorer ",
               onClick: () => {
+                console.log(result);
+
                 const hash = result.digest;
                 window.open(
                   `https://explorer.aptoslabs.com/txn/${hash}?network=testnet`,
@@ -207,7 +259,7 @@ export const AuctionActivity = () => {
 
   const handleClaimButton = (auction: AuctionType) => {
     const now = new Date();
-    const endTime = new Date(Number(auction.end_time) * 1000);
+    const endTime = new Date(Number(auction.end_time));
     if (now > endTime) {
       return true; // should be claim
     }
@@ -221,6 +273,7 @@ export const AuctionActivity = () => {
   }
 
   function getTimeDifference(timestamp: number): string {
+    timestamp = timestamp / 1000;
     const currentTime = Math.floor(Date.now() / 1000);
 
     if (currentTime >= timestamp) {
@@ -269,7 +322,7 @@ export const AuctionActivity = () => {
           />
         ) : (
           <Image
-            src={`data:image/svg+xml;base64,${NFTBase64.uri}`}
+            src={`${NFTBase64.uri}`}
             width={546}
             height={546}
             alt="Picture of the author"

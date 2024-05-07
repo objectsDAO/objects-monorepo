@@ -20,6 +20,7 @@ import {
   DialogTrigger,
 } from "@repo/ui/components/ui/dialog";
 import {
+  GovManager,
   NETWORK,
   OBJECT_ADDRESS,
   PACKAGE_ID,
@@ -78,13 +79,10 @@ function Proposal() {
         metadata: metadata,
       });
       const tx = new TransactionBlock();
-      const params = [];
-      const proposals: any[] = await obelisk.query.gov.get_all_proposals(
-        tx,
-        params,
-      );
+      const params = [tx.pure(GovManager)];
+      const proposals = await obelisk.query.gov.get_all_proposals(tx, params);
       console.log(proposals);
-      setProposals(proposals[0]);
+      setProposals(proposals.results[0].returnValues);
     };
     query_proposals();
   }, [proposals]);
@@ -97,16 +95,15 @@ function Proposal() {
         packageId: PACKAGE_ID,
         metadata: metadata,
       });
-      const balance = await obelisk.getBalance(TREASURE_ADDRESS);
-
+      const balance = await obelisk.balanceOf(TREASURE_ADDRESS);
       const objectBalance = await obelisk.balanceOf(
         TREASURE_ADDRESS,
         TREASURE_OBJECT_ADDRESS,
       );
       console.log(balance);
       console.log(objectBalance);
-      setTreasuryBalance(balance.toString());
-      setTreasuryObjectBalance(objectBalance.toString());
+      setTreasuryBalance(balance.totalBalance);
+      setTreasuryObjectBalance(objectBalance.totalBalance);
     };
     query_treasury_balance();
   }, [treasuryBalance]);
@@ -135,12 +132,20 @@ function Proposal() {
 
     const tx = new TransactionBlock();
     const params = [
-      tx.pure([OBJECT_ADDRESS]),
+      tx.object(OBJECT_ADDRESS),
+      tx.object(GovManager),
       tx.pure(proposalTitle),
       tx.pure(proposalDescription),
       tx.pure(startTimestamp.date.getTime()),
       tx.pure(endTimestamp.date.getTime()),
     ];
+
+    // _objects: &Objects,
+    // gov_manager:&mut GovManager,
+    // name: String,
+    // description: String,
+    // start_timestamp: u64,
+    // end_timestamp: u64,
     await obelisk.tx.gov.propose(
       tx,
       params, // params
