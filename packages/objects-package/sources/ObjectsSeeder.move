@@ -1,4 +1,5 @@
 module objectsDAO::objects_seeder {
+  use std::ascii;
   use std::string;
   use std::string::String;
   use std::vector;
@@ -20,21 +21,6 @@ module objectsDAO::objects_seeder {
   const NAME: vector<u8> = b"Objects";
   const DESCRIPTION: vector<u8> = b"Object NFT";
 
-  #[test_only]
-  use objectsDAO::descriptor::{init_test, addColorsToPalette, addManyBackgrounds, addManyAccessories, addManyGlasses,
-    addManyHeads, addManyBodies
-  };
-  #[test_only]
-  use sui::test_scenario;
-  #[test_only]
-  use std::debug;
-  #[test_only]
-  use objectsDAO::descriptor;
-  #[test_only]
-  use sui::random;
-  #[test_only]
-  use sui::random::Random;
-
   struct Seed has store,copy, drop {
     background: u64,
     body: u64,
@@ -48,12 +34,12 @@ module objectsDAO::objects_seeder {
   }
 
   struct Objects has key,store {
-      id:UID, /// Name for the token
-      name: string::String,
-      /// Description of the token
-      description: string::String,
-      /// URL for the token
-      image_url: Url,
+    id:UID, /// Name for the token
+    name: string::String,
+    /// Description of the token
+    description: string::String,
+    /// URL for the token
+    image_url: Url,
   }
 
   /// One-Time-Witness for the module.
@@ -71,7 +57,7 @@ module objectsDAO::objects_seeder {
 
     let values = vector[
       // For `name` we can use the `Hero.name` property
-      string::utf8(NAME),
+      string::utf8(b"Objects {name}"),
       // Description is static for all `Hero` objects.
       string::utf8(DESCRIPTION),
       // Project URL is usually static
@@ -95,7 +81,7 @@ module objectsDAO::objects_seeder {
     transfer::public_transfer(display, sender(ctx));
   }
 
-  public fun mint_nft(randomness: u64, objects_descriptor: &mut ObjectsDescriptor,ctx: &mut TxContext): Objects {
+  public fun mint_nft(nft_id: u64, randomness: u64, objects_descriptor: &mut ObjectsDescriptor,ctx: &mut TxContext): Objects {
     let seed = generateSeed(randomness, objects_descriptor);
     let generate_svg_image = generateSVGImage(seed, objects_descriptor);
 
@@ -103,7 +89,7 @@ module objectsDAO::objects_seeder {
 
     Objects {
       id: object::new(ctx),
-      name:string::utf8(b"1"),
+      name:string::utf8(ascii::into_bytes(to_string((nft_id as u128)))),
       description:string::utf8(b"1"),
       image_url:url::new_unsafe(url_ascii)
     }
@@ -149,46 +135,17 @@ module objectsDAO::objects_seeder {
     parts
   }
 
-  // #[test]
-  // fun test_generateSVGImage() {
-  //   let scenario_val = test_scenario::begin(@0x0);
-  //   let scenario = &mut scenario_val;
-  //
-  //   // setup random
-  //   random::create_for_testing(test_scenario::ctx(scenario));
-  //   test_scenario::next_tx(scenario, @0x0);
-  //   let random = test_scenario::take_shared<Random>(scenario);
-  //   random::update_randomness_state_for_testing(
-  //     &mut random,
-  //     0,
-  //     x"1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F1F",
-  //     test_scenario::ctx(scenario),
-  //   );
-  //     let random_generator = random::new_generator(&random, test_scenario::ctx(scenario));
-  //     let randomness = random::generate_u64(&mut random_generator);
-  //   debug::print(&randomness);
-  //
-  //   descriptor::init_test(test_scenario::ctx(scenario));
-  //   test_scenario::next_tx(scenario, @0x1);
-  //
-  //   let objects_descriptor = test_scenario::take_shared<ObjectsDescriptor>(scenario);
-  //   addColorsToPalette(&mut objects_descriptor);
-  //   addManyBackgrounds(&mut objects_descriptor);
-  //   addManyAccessories(&mut objects_descriptor);
-  //   addManyBodies(&mut objects_descriptor);
-  //   addManyGlasses(&mut objects_descriptor);
-  //
-  //
-  //
-  //   addManyHeads(heads, &mut objects_descriptor);
-  //
-  //   let seed = generateSeed(randomness, &mut objects_descriptor);
-  //   let svg = generateSVGImage(seed, &mut objects_descriptor);
-  //   debug::print(&svg);
-  //
-  //   // clock::destroy_for_testing(clock);
-  //   test_scenario::return_shared<ObjectsDescriptor>(objects_descriptor);
-  //   test_scenario::return_shared(random);
-  //   test_scenario::end(scenario_val);
-  // }
+  /// Converts a `u128` to its `ascii::String` decimal representation.
+  fun to_string(value: u128): ascii::String {
+    if (value == 0) {
+      return ascii::string(b"0")
+    };
+    let buffer = vector::empty<u8>();
+    while (value != 0) {
+      vector::push_back(&mut buffer, ((48 + value % 10) as u8));
+      value = value / 10;
+    };
+    vector::reverse(&mut buffer);
+    ascii::string(buffer)
+  }
 }

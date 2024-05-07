@@ -32,10 +32,10 @@ module objectsDAO::gov  {
   }
 
   fun init(ctx: &mut TxContext){
-     let gov_manager = GovManager {
-       id: object::new(ctx),
-       proposals: vector[]
-     };
+    let gov_manager = GovManager {
+      id: object::new(ctx),
+      proposals: vector[]
+    };
     // Transfer the forge object to the module/package publisher
     transfer::public_share_object(gov_manager);
   }
@@ -86,6 +86,13 @@ module objectsDAO::gov  {
     } else {
       proposal.deny_num = proposal.deny_num + 1;
     };
+  }
+
+  public entry fun excuted_confirm(gov_manager:&mut GovManager, clock: &Clock, proposal_id: u64, tx_id: String) {
+    let proposal = vector::borrow_mut(&mut gov_manager.proposals, proposal_id);
+    let time_now = clock::timestamp_ms(clock);
+    assert!(time_now > proposal.end_timestamp, 0);
+    proposal.excuted_hash = tx_id;
   }
 
   public fun get_result(gov_manager:&GovManager, proposal_id: u64): bool {

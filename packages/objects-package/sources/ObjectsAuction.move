@@ -54,31 +54,31 @@ module objectsDAO::objects_auction  {
   }
 
   struct Auction has copy, store {
-     object_address: ID,
+    object_address: ID,
     // The current highest bid amount
-      amount: u64,
+    amount: u64,
     // The time that the auction started
-      start_time:u64,
+    start_time:u64,
     // The time that the auction is scheduled to end
-      end_time:u64,
+    end_time:u64,
     // The address of the current highest bid
-      payable_bidder:address,
+    payable_bidder:address,
 
-      bid_list: vector<Bidder>,
+    bid_list: vector<Bidder>,
   }
 
 
   fun init(ctx: &mut TxContext){
-     let auction_manager = AuctionManager {
-       id: object::new(ctx),
-       reserve_price: 1000000,
-       time_buffer: 120,
-       duration: 300,
-       auctions: vector::empty(),
-       nfts: object_table::new(ctx),
-       treasury: tx_context::sender(ctx),
-       temp_balance: balance::zero()
-     };
+    let auction_manager = AuctionManager {
+      id: object::new(ctx),
+      reserve_price: 1000000,
+      time_buffer: 120000,
+      duration: 300000,
+      auctions: vector::empty(),
+      nfts: object_table::new(ctx),
+      treasury: tx_context::sender(ctx),
+      temp_balance: balance::zero()
+    };
     // Transfer the forge object to the module/package publisher
     transfer::public_share_object(auction_manager);
   }
@@ -90,7 +90,9 @@ module objectsDAO::objects_auction  {
     let random_generator = random::new_generator(random, ctx);
     let randomness = random::generate_u64(&mut random_generator);
 
-    let nft = mint_nft(randomness, objects_descriptor, ctx);
+    let nft_id = vector::length(&auction_manager.auctions);
+
+    let nft = mint_nft(nft_id, randomness, objects_descriptor, ctx);
     let nft_id = object::id(&nft);
 
     object_table::add(&mut auction_manager.nfts, nft_id, nft);
