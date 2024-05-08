@@ -92,14 +92,13 @@ export const Header = () => {
             </Button>
           </Link>
         </div>
-        <div className="ml-5">
-          {/* <Link href={`/userinfo/${currentWallet?.accounts}`}> */}
+        {/* <div className="ml-5">
           <Link href={`/userinfo/${wallet_address}`}>
             <Button variant="outline" className="font-bold bg-zinc-300 ">
               Space
             </Button>
           </Link>
-        </div>
+        </div> */}
       </div>
       <div>
         <ConnectButton />

@@ -6,12 +6,14 @@ import {
   TransactionBlock,
   DevInspectResults,
   ObeliskObjectContent,
+  MIST_PER_SUI,
 } from "@0xobelisk/sui-client";
 import {
   NETWORK,
   PACKAGE_ID,
   AuctionManager,
   ObjectsDescriptor,
+  TREASURE_OBJECT_ADDRESS,
 } from "../chain/config";
 import {
   ConnectButton,
@@ -27,9 +29,11 @@ import { toast } from "sonner";
 import { convertBalanceToCurrency } from "../utils";
 
 type BidListType = {
-  bid_address: string;
-  bid_price: string;
-  bid_time: string;
+  fields: {
+    bid_address: string;
+    bid_price: string;
+    bid_time: string;
+  };
 };
 
 type AuctionType = {
@@ -48,9 +52,11 @@ export const AuctionActivity = () => {
     amount: "",
     bid_list: [
       {
-        bid_address: "",
-        bid_price: "",
-        bid_time: "",
+        fields: {
+          bid_address: "",
+          bid_price: "",
+          bid_time: "",
+        },
       },
     ],
     end_time: "",
@@ -111,52 +117,9 @@ export const AuctionActivity = () => {
           ),
         );
       }
-      // const auctionData: DevInspectResults =
-      //   await obelisk.query.objects_auction.get_last_auction(
-      //     auctionTx,
-      //     auctionParams,
-      //   );
-      // const formatAuctionData = formatQueryResult(auctionData);
-
-      // const nftTx = new TransactionBlock();
-      // const nftParams = [auctionData[0].object_address];
-      // const nft_svg: any[] = await obelisk.query.token.view_token_svg(
-      //   nftTx,
-      //   nftParams,
-      // );
-      // console.log(nft_svg);
-      // nft_res.name = nft_svg[0].name;
-      // nft_res.uri = nft_svg[0].uri;
-      // setNFTBase64(nft_res);
-      // setAuction(auctionData[0]);
-
-      // setBidding(
-      // 	Number(
-      // 		convertBalanceToCurrency(
-      // 			Number(auctionData[0].amount) + 10000000
-      // 		)
-      // 	)
-      // );
     };
     query_latest_auction();
   }, [auction]);
-
-  // useEffect(() => {
-  // 	const query_auctions = async () => {
-  // 		const metadata = await loadMetadata(NETWORK, PACKAGE_ID);
-
-  // 		const obelisk = new Obelisk({
-  // 			networkType: NETWORK,
-  // 			packageId: PACKAGE_ID,
-  // 			metadata: metadata,
-  // 		});
-  // 		const auctionsData: any[] =
-  // 			await obelisk.query.objects_auctio.get_all_auctions();
-  // 		console.log(auctionsData);
-  // 		setAuctions(auctionsData[0]);
-  // 	};
-  // 	query_auctions();
-  // }, [auctions]);
 
   const handleAuction = async () => {
     const metadata = await loadMetadata(NETWORK, PACKAGE_ID);
@@ -168,8 +131,15 @@ export const AuctionActivity = () => {
     });
 
     const tx = new TransactionBlock();
-    const bidding_amount = tx.pure(Number(bidding) * 100000000);
-    const bidding_coin = tx.splitCoins(tx.gas, [bidding_amount]);
+    const selectCoins = await obelisk.selectCoinsWithAmount(
+      Math.floor(Number(bidding) * 100000000),
+      TREASURE_OBJECT_ADDRESS,
+      address,
+    );
+    const bidding_amount = tx.pure(Math.floor(Number(bidding) * 100000000));
+    const [bidding_coin] = tx.splitCoins(tx.object(selectCoins[0]), [
+      bidding_amount,
+    ]);
     const params = [bidding_coin, tx.pure("0x6"), tx.pure(AuctionManager)];
     await obelisk.tx.objects_auction.create_bid(
       tx,
@@ -183,6 +153,9 @@ export const AuctionActivity = () => {
         transactionBlock: tx,
       },
       {
+        onError: (result) => {
+          console.log(result);
+        },
         onSuccess: async (result) => {
           toast("Translation Successful", {
             description: new Date().toUTCString(),
@@ -190,10 +163,7 @@ export const AuctionActivity = () => {
               label: "Check in Explorer ",
               onClick: () => {
                 const hash = result.digest;
-                window.open(
-                  `https://explorer.aptoslabs.com/txn/${hash}?network=testnet`,
-                  "_blank",
-                ); // 在新页面中打开链接
+                window.open(`https://suiscan.xyz/devnet/tx/${hash}`, "_blank"); // 在新页面中打开链接
                 // router.push(`https://explorer.aptoslabs.com/txn/${tx}?network=devnet`)
               },
             },
@@ -218,7 +188,7 @@ export const AuctionActivity = () => {
       tx.object(AuctionManager),
       tx.object(ObjectsDescriptor),
     ];
-    tx.setGasBudget(1000000000);
+    tx.setGasBudget(1500000000);
     await obelisk.tx.objects_auction.claim(
       tx,
       params, // params
@@ -244,10 +214,7 @@ export const AuctionActivity = () => {
                 console.log(result);
 
                 const hash = result.digest;
-                window.open(
-                  `https://explorer.aptoslabs.com/txn/${hash}?network=testnet`,
-                  "_blank",
-                ); // 在新页面中打开链接
+                window.open(`https://suiscan.xyz/devnet/tx/${hash}`, "_blank"); // 在新页面中打开链接
                 // router.push(`https://explorer.aptoslabs.com/txn/${tx}?network=devnet`)
               },
             },
@@ -286,8 +253,7 @@ export const AuctionActivity = () => {
     const days = Math.floor(timeDifference / (24 * 3600));
     const hours = Math.floor((timeDifference % (24 * 3600)) / 3600);
     const minutes = Math.floor((timeDifference % 3600) / 60);
-    const seconds = timeDifference % 60;
-
+    const seconds = Math.floor(timeDifference % 60);
     const formattedTime = `${days} ${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
     return formattedTime;
   }
@@ -384,9 +350,14 @@ export const AuctionActivity = () => {
                 </h4>
                 {auction.bid_list.map((bidding_body) => (
                   <>
-                    <div key={bidding_body.bid_address} className="text-sm">
-                      {shortenHex(bidding_body.bid_address)} Ξ{" "}
-                      {convertBalanceToCurrency(Number(bidding_body.bid_price))}{" "}
+                    <div
+                      key={bidding_body.fields.bid_address}
+                      className="text-sm"
+                    >
+                      {shortenHex(bidding_body.fields.bid_address)} Ξ{" "}
+                      {convertBalanceToCurrency(
+                        Number(bidding_body.fields.bid_price),
+                      )}{" "}
                       OBJ
                     </div>
                   </>

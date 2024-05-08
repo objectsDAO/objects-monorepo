@@ -6,9 +6,15 @@ import {
   GovManager,
   NETWORK,
   OBJECT_ADDRESS,
+  OBJECT_TYPE,
   PACKAGE_ID,
 } from "../../chain/config";
-import { Obelisk, loadMetadata, TransactionBlock } from "@0xobelisk/sui-client";
+import {
+  Obelisk,
+  loadMetadata,
+  TransactionBlock,
+  ObeliskObjectContent,
+} from "@0xobelisk/sui-client";
 import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
 import {
@@ -27,26 +33,87 @@ import {
 } from "@mysten/dapp-kit";
 import { toast } from "sonner";
 
+type ProposalType = {
+  fields: {
+    approve_num: string;
+    creater: string;
+    deny_num: string;
+    description: string;
+    end_timestamp: string;
+    executed_hash: string;
+    id: string;
+    name: string;
+    start_timestamp: string;
+  };
+};
+
 export default function Page({ params }: { params: { id: string } }) {
   const [voteOpen, setVoteOpen] = useState(false);
   const [executeOpen, setExecuteOpen] = useState(false);
   const [executedHash, setExecutedHash] = useState("");
-  const [proposal, setProposal] = React.useState({
-    name: "",
-    description: "",
-    start_timestamp: "",
-    end_timestamp: "",
-    approve_num: "",
-    deny_num: "",
-    creater: "",
-    excuted_hash: "",
+  const [proposal, setProposal] = React.useState<ProposalType>({
+    fields: {
+      approve_num: "",
+      creater: "",
+      deny_num: "",
+      description: "",
+      end_timestamp: "",
+      executed_hash: "",
+      id: "",
+      name: "",
+      start_timestamp: "",
+    },
   });
+  const [ownedObjects, setOwnedObjects] = React.useState([]);
 
   const { mutate: signAndExecuteTransactionBlock } =
     useSignAndExecuteTransactionBlock();
+  const address = useCurrentAccount()?.address;
+
+  // useEffect(() => {
+  //   const query_proposal = async (proposal_id: string) => {
+  //     const metadata = await loadMetadata(NETWORK, PACKAGE_ID);
+
+  //     const obelisk = new Obelisk({
+  //       networkType: NETWORK,
+  //       packageId: PACKAGE_ID,
+  //       metadata: metadata,
+  //     });
+
+  //     const tx = new TransactionBlock();
+  //     const proposalParams = [tx.pure(GovManager), tx.pure(proposal_id)];
+  //     const proposal: any[] = await obelisk.query.gov.get_proposal(
+  //       tx,
+  //       proposalParams,
+  //     );
+  //     console.log(proposal);
+  //     setProposal(proposal[0]);
+  //   };
+  //   query_proposal(params.id);
+  // }, [proposal]);
 
   useEffect(() => {
-    const query_proposal = async (proposal_id: string) => {
+    const query_proposal = async () => {
+      const metadata = await loadMetadata(NETWORK, PACKAGE_ID);
+
+      const obelisk = new Obelisk({
+        networkType: NETWORK,
+        packageId: PACKAGE_ID,
+        metadata: metadata,
+      });
+      const govObject = await obelisk.getObject(GovManager);
+      const itemObjectContent = govObject.content;
+      if (itemObjectContent != null) {
+        const objectContent = itemObjectContent as ObeliskObjectContent;
+        const objectFields = objectContent.fields as Record<string, any>;
+        setProposal(objectFields.proposals[params.id]);
+      }
+    };
+    query_proposal();
+  }, [proposal]);
+
+  useEffect(() => {
+    const query_owned_objects = async () => {
       const metadata = await loadMetadata(NETWORK, PACKAGE_ID);
 
       const obelisk = new Obelisk({
@@ -55,17 +122,19 @@ export default function Page({ params }: { params: { id: string } }) {
         metadata: metadata,
       });
 
-      const tx = new TransactionBlock();
-      const proposalParams = [tx.pure(GovManager), tx.pure(proposal_id)];
-      const proposal: any[] = await obelisk.query.gov.get_proposal(
-        tx,
-        proposalParams,
-      );
-      console.log(proposal);
-      setProposal(proposal[0]);
+      try {
+        const objects = await obelisk.selectObjectsWithType(
+          OBJECT_TYPE,
+          address,
+        );
+        setOwnedObjects(objects);
+        console.log(objects);
+      } catch {
+        console.log("no object");
+      }
     };
-    query_proposal(params.id);
-  }, [proposal]);
+    query_owned_objects();
+  }, [ownedObjects]);
 
   const handleVote = async (voteChoise) => {
     console.log("vote");
@@ -79,9 +148,9 @@ export default function Page({ params }: { params: { id: string } }) {
 
     const tx = new TransactionBlock();
     const voteParams = [
-      tx.pure(OBJECT_ADDRESS),
+      tx.pure(ownedObjects[0]),
       tx.pure(GovManager),
-      tx.pure(0x6),
+      tx.pure("0x6"),
       tx.pure(params.id),
       tx.pure(voteChoise),
     ];
@@ -110,10 +179,7 @@ export default function Page({ params }: { params: { id: string } }) {
               label: "Check in Explorer ",
               onClick: () => {
                 const hash = result.digest;
-                window.open(
-                  `https://explorer.aptoslabs.com/txn/${hash}?network=testnet`,
-                  "_blank",
-                ); // 在新页面中打开链接
+                window.open(`https://suiscan.xyz/devnet/tx/${hash}`, "_blank"); // 在新页面中打开链接
                 // router.push(`https://explorer.aptoslabs.com/txn/${tx}?network=devnet`)
               },
             },
@@ -136,7 +202,12 @@ export default function Page({ params }: { params: { id: string } }) {
       metadata: metadata,
     });
     const tx = new TransactionBlock();
-    const confirmParams = [tx.pure(params.id), tx.pure(executedHash)];
+    const confirmParams = [
+      tx.pure(GovManager),
+      tx.pure("0x6"),
+      tx.pure(params.id),
+      tx.pure(executedHash),
+    ];
     await obelisk.tx.gov.excuted_confirm(
       tx,
       confirmParams, // params
@@ -156,10 +227,7 @@ export default function Page({ params }: { params: { id: string } }) {
               label: "Check in Explorer ",
               onClick: () => {
                 const hash = result.digest;
-                window.open(
-                  `https://explorer.aptoslabs.com/txn/${hash}?network=testnet`,
-                  "_blank",
-                ); // 在新页面中打开链接
+                window.open(`https://suiscan.xyz/devnet/tx/${hash}`, "_blank"); // 在新页面中打开链接
                 // router.push(`https://explorer.aptoslabs.com/txn/${tx}?network=devnet`)
               },
             },
@@ -225,7 +293,7 @@ export default function Page({ params }: { params: { id: string } }) {
   // return <h1>My Page {params.id}</h1>;
   // let a= proposal.start_timestamp
   // const start_time = new Date(a)
-  console.log(proposal.start_timestamp);
+  console.log(proposal.fields.start_timestamp);
   return (
     <>
       <main className="flex flex-col min-h-screen min-w-full mt-12">
@@ -235,37 +303,38 @@ export default function Page({ params }: { params: { id: string } }) {
               # {params.id}
             </h4>
             <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mb-2">
-              {proposal.name}
+              {proposal.fields.name}
             </h1>
             <p className="leading-7 [&:not(:first-child)]:mt-6 mb-2">
-              created by {proposal.creater}
+              created by {proposal.fields.creater}
             </p>
             <p className="leading-7 [&:not(:first-child)]:mt-6 mb-2">
-              yes {proposal.approve_num} / no {proposal.deny_num}
+              yes {proposal.fields.approve_num} / no {proposal.fields.deny_num}
             </p>
             <p className="leading-7 [&:not(:first-child)]:mt-6 mb-2">
-              Description: {proposal.description}
+              Description: {proposal.fields.description}
             </p>
             <p className="leading-7 [&:not(:first-child)]:mt-6 mb-2">
               Start Time:{" "}
-              {new Date(Number(proposal.start_timestamp)).toUTCString()}
+              {new Date(Number(proposal.fields.start_timestamp)).toUTCString()}
             </p>
             <p className="leading-7 [&:not(:first-child)]:mt-6 mb-2">
-              End time: {new Date(Number(proposal.end_timestamp)).toUTCString()}
+              End time:{" "}
+              {new Date(Number(proposal.fields.end_timestamp)).toUTCString()}
             </p>
-            {proposal.excuted_hash !== "" ? (
+            {proposal.fields.executed_hash !== "" ? (
               <p className="leading-7 [&:not(:first-child)]:mt-6 mb-2">
-                Excuted Hash: {proposal.excuted_hash}
+                Excuted Hash: {proposal.fields.executed_hash}
               </p>
             ) : (
               <></>
             )}
           </div>
           {handleResult(
-            Number(proposal.start_timestamp),
-            Number(proposal.end_timestamp),
-            Number(proposal.approve_num),
-            Number(proposal.deny_num),
+            Number(proposal.fields.start_timestamp),
+            Number(proposal.fields.end_timestamp),
+            Number(proposal.fields.approve_num),
+            Number(proposal.fields.deny_num),
           ) === "PASSED" ? (
             <Dialog open={executeOpen} onOpenChange={setExecuteOpen}>
               <DialogTrigger asChild>
@@ -306,10 +375,10 @@ export default function Page({ params }: { params: { id: string } }) {
               </DialogContent>
             </Dialog>
           ) : handleResult(
-              Number(proposal.start_timestamp),
-              Number(proposal.end_timestamp),
-              Number(proposal.approve_num),
-              Number(proposal.deny_num),
+              Number(proposal.fields.start_timestamp),
+              Number(proposal.fields.end_timestamp),
+              Number(proposal.fields.approve_num),
+              Number(proposal.fields.deny_num),
             ) === "PROCESSING" ? (
             <Dialog open={voteOpen} onOpenChange={setVoteOpen}>
               <DialogTrigger asChild>

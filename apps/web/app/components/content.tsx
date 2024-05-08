@@ -44,7 +44,7 @@ const daily_auctions = [
     content:
       "he Objects Auction Contract will act as a self-sufficient Object\n" +
       "            generation and distribution mechanism, auctioning one Object every 1\n" +
-      "            hour, forever. 100% of auction proceeds (Object &&APT) are\n" +
+      "            hour, forever. 100% of auction proceeds (Object && SUI) are\n" +
       "            automatically deposited in the Objects DAO treasury, where they are\n" +
       "            governed by Object owners.",
   },
@@ -158,7 +158,7 @@ export const Content = () => {
             <p className="text-gray-700">
               The Objects Auction Contract will act as a self-sufficient Object
               generation and distribution mechanism, auctioning one Object every
-              1 hour, forever. 100% of auction proceeds (OBJ &&APT) are
+              1 hour, forever. 100% of auction proceeds (OBJ && SUI) are
               automatically deposited in the Objects DAO treasury, where they
               are governed by Object owners
             </p>
@@ -234,7 +234,7 @@ export const Content = () => {
   //       {/*<p>*/}
   //       {/*  The Objects Auction Contract will act as a self-sufficient Object*/}
   //       {/*  generation and distribution mechanism, auctioning one Object every 1*/}
-  //       {/*  hour, forever. 100% of auction proceeds (Object &&APT) are*/}
+  //       {/*  hour, forever. 100% of auction proceeds (Object && SUI) are*/}
   //       {/*  automatically deposited in the Objects DAO treasury, where they are*/}
   //       {/*  governed by Object owners.*/}
   //       {/*</p>*/}

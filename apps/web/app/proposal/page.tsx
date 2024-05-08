@@ -23,11 +23,17 @@ import {
   GovManager,
   NETWORK,
   OBJECT_ADDRESS,
+  OBJECT_TYPE,
   PACKAGE_ID,
   TREASURE_ADDRESS,
   TREASURE_OBJECT_ADDRESS,
 } from "../chain/config";
-import { Obelisk, loadMetadata, TransactionBlock } from "@0xobelisk/sui-client";
+import {
+  Obelisk,
+  loadMetadata,
+  TransactionBlock,
+  ObeliskObjectContent,
+} from "@0xobelisk/sui-client";
 import { Button } from "@repo/ui/components/ui/button";
 import React, { useState, useEffect } from "react";
 
@@ -39,6 +45,20 @@ import {
   useSignAndExecuteTransactionBlock,
 } from "@mysten/dapp-kit";
 import { toast } from "sonner";
+
+type ProposalType = {
+  fields: {
+    approve_num: string;
+    creater: string;
+    deny_num: string;
+    description: string;
+    end_timestamp: string;
+    executed_hash: string;
+    id: string;
+    name: string;
+    start_timestamp: string;
+  };
+};
 
 function Proposal() {
   // const router = useRouter();
@@ -63,11 +83,27 @@ function Proposal() {
     date: new Date(),
     hasTime: true,
   });
-  const [proposals, setProposals] = React.useState([]);
+  const [proposals, setProposals] = React.useState<ProposalType[]>([
+    {
+      fields: {
+        approve_num: "",
+        creater: "",
+        deny_num: "",
+        description: "",
+        end_timestamp: "",
+        executed_hash: "",
+        id: "",
+        name: "",
+        start_timestamp: "",
+      },
+    },
+  ]);
+  const [ownedObjects, setOwnedObjects] = React.useState([]);
   const [treasuryBalance, setTreasuryBalance] = React.useState("0");
   const [treasuryObjectBalance, setTreasuryObjectBalance] = React.useState("0");
 
   const timeZone = new Date().getTimezoneOffset() / -60;
+  const address = useCurrentAccount()?.address;
 
   useEffect(() => {
     const query_proposals = async () => {
@@ -78,14 +114,40 @@ function Proposal() {
         packageId: PACKAGE_ID,
         metadata: metadata,
       });
-      const tx = new TransactionBlock();
-      const params = [tx.pure(GovManager)];
-      const proposals = await obelisk.query.gov.get_all_proposals(tx, params);
-      console.log(proposals);
-      setProposals(proposals.results[0].returnValues);
+      const govObject = await obelisk.getObject(GovManager);
+      const itemObjectContent = govObject.content;
+      if (itemObjectContent != null) {
+        const objectContent = itemObjectContent as ObeliskObjectContent;
+        const objectFields = objectContent.fields as Record<string, any>;
+        setProposals(objectFields.proposals);
+      }
     };
     query_proposals();
   }, [proposals]);
+
+  useEffect(() => {
+    const query_owned_objects = async () => {
+      const metadata = await loadMetadata(NETWORK, PACKAGE_ID);
+
+      const obelisk = new Obelisk({
+        networkType: NETWORK,
+        packageId: PACKAGE_ID,
+        metadata: metadata,
+      });
+
+      try {
+        const objects = await obelisk.selectObjectsWithType(
+          OBJECT_TYPE,
+          address,
+        );
+        setOwnedObjects(objects);
+        console.log(objects);
+      } catch {
+        console.log("no object");
+      }
+    };
+    query_owned_objects();
+  }, [ownedObjects]);
 
   useEffect(() => {
     const query_treasury_balance = async () => {
@@ -100,8 +162,6 @@ function Proposal() {
         TREASURE_ADDRESS,
         TREASURE_OBJECT_ADDRESS,
       );
-      console.log(balance);
-      console.log(objectBalance);
       setTreasuryBalance(balance.totalBalance);
       setTreasuryObjectBalance(objectBalance.totalBalance);
     };
@@ -131,8 +191,10 @@ function Proposal() {
     });
 
     const tx = new TransactionBlock();
+    console.log(ownedObjects);
+    console.log(ownedObjects[0]);
     const params = [
-      tx.object(OBJECT_ADDRESS),
+      tx.object(ownedObjects[0]),
       tx.object(GovManager),
       tx.pure(proposalTitle),
       tx.pure(proposalDescription),
@@ -158,6 +220,9 @@ function Proposal() {
         transactionBlock: tx,
       },
       {
+        onError: (result) => {
+          console.log(result);
+        },
         onSuccess: async (result) => {
           toast("Translation Successful", {
             description: new Date().toUTCString(),
@@ -165,10 +230,7 @@ function Proposal() {
               label: "Check in Explorer ",
               onClick: () => {
                 const hash = result.digest;
-                window.open(
-                  `https://explorer.aptoslabs.com/txn/${hash}?network=testnet`,
-                  "_blank",
-                ); // 在新页面中打开链接
+                window.open(`https://suiscan.xyz/devnet/tx/${hash}`, "_blank"); // 在新页面中打开链接
                 // router.push(`https://explorer.aptoslabs.com/txn/${tx}?network=devnet`)
               },
             },
@@ -255,7 +317,7 @@ function Proposal() {
               <CardContent className="flex">
                 <div className="text-2xl">
                   Ξ{" "}
-                  {`${convertBalanceToCurrency(Number(treasuryObjectBalance))} OBJ + ${convertBalanceToCurrency(Number(treasuryBalance))} APT`}
+                  {`${convertBalanceToCurrency(Number(treasuryObjectBalance))} OBJ + ${convertBalanceToCurrency(Number(treasuryBalance))} SUI`}
                 </div>{" "}
               </CardContent>
             </Card>
@@ -339,11 +401,12 @@ function Proposal() {
                           {index}
                         </div>
                         <div className="text-xl font-londrina-solid font-bold">
-                          {proposal.name}
+                          {proposal.fields.name}
                         </div>
                         <div className="text-gray-400 text-2 font-londrina-solid font-bold mr-2 ml-2">
                           {" ("}
-                          {proposal.approve_num} / {proposal.deny_num}
+                          {proposal.fields.approve_num} /{" "}
+                          {proposal.fields.deny_num}
                           {")"}
                         </div>
                       </div>
@@ -351,37 +414,37 @@ function Proposal() {
                         <div
                           className={
                             handleStatusByVotingTime(
-                              Number(proposal.start_timestamp),
-                              Number(proposal.end_timestamp),
+                              Number(proposal.fields.start_timestamp),
+                              Number(proposal.fields.end_timestamp),
                             ) == "Ongoing"
                               ? "text-blue-100 bg-green-400 text-white px-4 py-2 mr-2 rounded"
                               : handleStatusByVotingTime(
-                                    Number(proposal.start_timestamp),
-                                    Number(proposal.end_timestamp),
+                                    Number(proposal.fields.start_timestamp),
+                                    Number(proposal.fields.end_timestamp),
                                   ) == "Pending"
                                 ? "bg-gray-300 text-gray-400 text-white px-4 py-2 mr-2 rounded"
                                 : "bg-gray-300 text-gray-400 text-white px-4 py-2 mr-2 rounded"
                           }
                         >
                           {handleStatusByVotingTime(
-                            Number(proposal.start_timestamp),
-                            Number(proposal.end_timestamp),
+                            Number(proposal.fields.start_timestamp),
+                            Number(proposal.fields.end_timestamp),
                           )}
                         </div>
                         {handleResult(
-                          Number(proposal.start_timestamp),
-                          Number(proposal.end_timestamp),
-                          Number(proposal.approve_num),
-                          Number(proposal.deny_num),
+                          Number(proposal.fields.start_timestamp),
+                          Number(proposal.fields.end_timestamp),
+                          Number(proposal.fields.approve_num),
+                          Number(proposal.fields.deny_num),
                         ) === "PASSED" ? (
                           <div className="bg-green-500 text-white px-4 py-2 rounded">
                             PASSED
                           </div>
                         ) : handleResult(
-                            Number(proposal.start_timestamp),
-                            Number(proposal.end_timestamp),
-                            Number(proposal.approve_num),
-                            Number(proposal.deny_num),
+                            Number(proposal.fields.start_timestamp),
+                            Number(proposal.fields.end_timestamp),
+                            Number(proposal.fields.approve_num),
+                            Number(proposal.fields.deny_num),
                           ) === "REJECTED" ? (
                           <div className="bg-red-500 text-white px-4 py-2 rounded">
                             REJECTED
