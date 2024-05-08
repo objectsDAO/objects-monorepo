@@ -61,7 +61,7 @@ export const Header = () => {
     return formattedAmount;
   }
 
-  const address = `https://explorer.aptoslabs.com/account/${TREASURE_ADDRESS}/coins?network=testnet`;
+  const address = `https://suiscan.xyz/devnet/account/${TREASURE_ADDRESS}`;
 
   return (
     <div className="flex items-center justify-around bg-zinc-300 py-6">

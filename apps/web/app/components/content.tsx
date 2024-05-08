@@ -87,8 +87,8 @@ export const Content = () => {
       <p className="mb-4">
         Objects Dao is an innovative pilot project aimed at building a fully
         on-chain decentralized community based on the
-        <a className="text-blue-600 underline" href="https://aptoslabs.com/">
-          Aptos
+        <a className="text-blue-600 underline" href="https://sui.io">
+          Sui
         </a>
         network through the Move language. It is inspired by Nouns Dao, but
         based on it, a lot of optimizations and innovations have been made, in
@@ -170,7 +170,7 @@ export const Content = () => {
             <p className="text-gray-700 mt-2">
               While settlement is most heavily incentivized for the winning
               bidder, it can be triggered by anyone, allowing the system to
-              trustlessly auction Objects as long as Aptos is operational and
+              trustlessly auction Objects as long as Sui is operational and
               there are interested bidders.
             </p>
           </div>
@@ -298,7 +298,7 @@ export const Content = () => {
   //   <AccordionItem value="item-5">
   //     <AccordionTrigger>Object Traits</AccordionTrigger>
   //     <AccordionContent>
-  //       **Objects are generated randomly based on Aptos randomness. There are
+  //       **Objects are generated randomly based on Sui randomness. There are
   //       no 'if' statements or other rules governing Object trait scarcity,
   //       which makes all Objects equally rare. As of this writing, Objects are
   //       made up of:** **backgrounds (2)bodies (30)accessories (140)heads
@@ -309,7 +309,7 @@ export const Content = () => {
   //   <AccordionItem value="item-6">
   //     <AccordionTrigger>On-Chain Artwork</AccordionTrigger>
   //     <AccordionContent>
-  //       **Objects are stored directly on Aptos and do not utilize pointers to
+  //       **Objects are stored directly on Sui and do not utilize pointers to
   //       other networks such as IPFS. This is possible because Object parts are
   //       compressed and stored on-chain using a custom run-length encoding
   //       (RLE), which is a form of lossless compression.** **The compressed

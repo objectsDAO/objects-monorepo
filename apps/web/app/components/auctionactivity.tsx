@@ -164,7 +164,6 @@ export const AuctionActivity = () => {
               onClick: () => {
                 const hash = result.digest;
                 window.open(`https://suiscan.xyz/devnet/tx/${hash}`, "_blank"); // 在新页面中打开链接
-                // router.push(`https://explorer.aptoslabs.com/txn/${tx}?network=devnet`)
               },
             },
           });
@@ -215,7 +214,6 @@ export const AuctionActivity = () => {
 
                 const hash = result.digest;
                 window.open(`https://suiscan.xyz/devnet/tx/${hash}`, "_blank"); // 在新页面中打开链接
-                // router.push(`https://explorer.aptoslabs.com/txn/${tx}?network=devnet`)
               },
             },
           });
